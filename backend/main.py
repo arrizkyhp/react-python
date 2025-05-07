@@ -45,8 +45,6 @@ def get_contacts():
     response_data = {"contacts": json_contacts, "pagination": pagination_metadata}
     response = make_response(jsonify(response_data))
 
-    response.headers['Cache-Control'] = 'public, max-age=300'
-
     return response
 
 @app.route("/api/contacts", methods=["POST"])
