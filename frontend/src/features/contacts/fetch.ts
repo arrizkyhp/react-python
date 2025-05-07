@@ -21,7 +21,7 @@ export const fetchContacts = async (params: BaseQueryParams): Promise<FetchConta
 };
 
 export const createContact = async (contactData: Omit<Contact, 'id'>): Promise<Contact> => {
-    const response = await fetch('http://127.0.0.1:5000/api/create_contact', {
+    const response = await fetch('http://127.0.0.1:5000/api/contacts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(contactData),
@@ -34,7 +34,7 @@ export const createContact = async (contactData: Omit<Contact, 'id'>): Promise<C
 };
 
 export const updateContact = async (id: number, contactData: Partial<Omit<Contact, 'id'>>): Promise<Contact> => {
-    const response = await fetch(`http://127.0.0.1:5000/api/update_contact/${id}`, {
+    const response = await fetch(`http://127.0.0.1:5000/api/contacts/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(contactData),
@@ -47,7 +47,7 @@ export const updateContact = async (id: number, contactData: Partial<Omit<Contac
 };
 
 export const deleteContact = async (id: number): Promise<void> => {
-    const response = await fetch(`http://127.0.0.1:5000/api/delete_contact/${id}`, {
+    const response = await fetch(`http://127.0.0.1:5000/api/contacts/${id}`, {
         method: 'DELETE',
     });
     if (!response.ok) {
