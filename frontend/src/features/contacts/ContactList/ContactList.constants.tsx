@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table";
+import {ColumnDef} from "@tanstack/react-table";
 import {Contact} from "@/types/contact.ts";
 
 export const columns: ColumnDef<Contact>[] = [
@@ -8,10 +8,11 @@ export const columns: ColumnDef<Contact>[] = [
     },
     {
         accessorKey: "lastName",
-        header: "Last Name"
+        header: "Last Name",
+
     },
     {
         accessorKey: "email",
-        header: () => <div className="text-center">Amount</div>,
+        header: () => <div className="text-center">Email</div>,
     }
 ]

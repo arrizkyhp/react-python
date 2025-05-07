@@ -1,4 +1,4 @@
-import {FormEvent, useEffect, useState} from 'react'
+import {FormEvent, useState} from 'react'
 import './App.css'
 import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet.tsx";
 import {Button} from "@/components/ui/button.tsx";
@@ -11,11 +11,14 @@ import {toast} from "sonner";
 import {Check} from "lucide-react";
 import ContactForm from "@/features/contacts/ContactForm.tsx";
 import ContactList from './features/contacts/ContactList';
+import {useMutation, useQueryClient} from "@tanstack/react-query";
+import {createContact, deleteContact, updateContact} from "@/features/contacts/fetch.ts";
 
 // !TODO ADD DATA_TABLE
 
 function App() {
-    const [contacts, setContacts] = useState([])
+    const queryClient = useQueryClient();
+
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -25,17 +28,65 @@ function App() {
     const [contactToDeleteId, setContactToDeleteId] = useState<number | null>(null); // State for contact ID to delete
     const [contactToDeleteName, setContactToDeleteName] = useState<string | null>(null); // New state for contact name to delete
 
-    const fetchContacts = async () => {
-        const response = await fetch('http://127.0.0.1:5000/api/contacts');
+    const createContactMutation = useMutation({
+        mutationFn: createContact,
+        onSuccess: () => {
+            toast('Contact created successfully!', {
+                position: 'top-center',
+                icon: <Check />
+            });
+            // Invalidate and refetch the contacts query
+            queryClient.invalidateQueries({ queryKey: ['contacts'] });
+            // Clear form and close sheet
+            setFirstName('');
+            setLastName('');
+            setEmail('');
+            setIsSheetOpen(false);
+        },
+        onError: (error: Error) => {
+            alert(`Error creating contact: ${error.message}`);
+        },
+    });
 
-        const data = await response.json();
-        setContacts(data.contacts);
+    const updateContactMutation = useMutation({
+        mutationFn: ({ id, contactData }: { id: number, contactData: Partial<Omit<Contact, 'id'>> }) => updateContact(id, contactData),
+        onSuccess: () => {
+            toast('Contact updated successfully!', {
+                position: 'top-center',
+                icon: <Check />
+            });
+            // Invalidate and refetch the contacts query
+            queryClient.invalidateQueries({ queryKey: ['contacts'] });
+            // Clear form and close sheet
+            setEditingContactId(null);
+            setFirstName('');
+            setLastName('');
+            setEmail('');
+            setIsSheetOpen(false);
+        },
+        onError: (error: Error) => {
+            alert(`Error updating contact: ${error.message}`);
+        },
+    });
 
-    }
-
-    useEffect(() => {
-        fetchContacts();
-    }, [])
+    const deleteContactMutation = useMutation({
+        mutationFn: deleteContact,
+        onSuccess: () => {
+            toast('Contact deleted successfully', {
+                position: 'top-center',
+                icon: <Check />
+            });
+            // Invalidate and refetch the contacts query
+            queryClient.invalidateQueries({ queryKey: ['contacts'] });
+            // Close the dialog
+            setIsAlertDialogOpen(false);
+            setContactToDeleteId(null);
+            setContactToDeleteName(null);
+        },
+        onError: (error: Error) => {
+            alert(`Error deleting contact: ${error.message}`);
+        },
+    });
 
     const handleOpenCreateSheet = () => {
         // Clear the form fields when opening for creation
@@ -61,25 +112,8 @@ function App() {
     }
 
     const handleDeleteContactConfirm = async () => {
-        const url = `http://127.0.0.1:5000/api/delete_contact/${contactToDeleteId}`;
-
-
-        try {
-            const response = await fetch(url, {
-                method: 'DELETE'
-            });
-
-            if (response.status === 200) {
-                fetchContacts()
-                toast('Contact deleted successfully', {
-                    position: 'top-center',
-                    icon: <Check />
-                })
-            } else {
-                alert('An error occurred while deleting the contact.');
-            }
-        } catch (error) {
-            alert(error);
+        if (contactToDeleteId !== null) {
+            deleteContactMutation.mutate(contactToDeleteId);
         }
     }
 
@@ -92,43 +126,10 @@ function App() {
             email,
         }
 
-        let url = 'http://127.0.0.1:5000/api';
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        }
-
         if (editingContactId) {
-            url += `/update_contact/${editingContactId}`;
-            options.method = 'PATCH';
+            updateContactMutation.mutate({ id: editingContactId, contactData: data });
         } else {
-            url += '/create_contact';
-        }
-
-        try {
-            const response = await fetch(url, options);
-            if (response.status !== 201 && response.status !== 200) {
-                const data = await response.json();
-                alert(data.message);
-            } else {
-                toast(`${editingContactId ? 'Contact updated' : 'Contact created'} successfully!`, {
-                    position: 'top-center',
-                    icon: <Check />
-                })
-                // Refetch the contacts list
-                fetchContacts();
-                // Clear the form
-                setFirstName('');
-                setLastName('');
-                setEmail('');
-                // Close the sheet on success
-                setIsSheetOpen(false);
-            }
-        } catch {
-            alert('An error occurred while creating the contact.');
+            createContactMutation.mutate(data);
         }
     }
 
@@ -159,7 +160,6 @@ function App() {
            </Sheet>
 
            <ContactList
-               contacts={contacts}
                onEditClick={handleOpenEditSheet}
                onDeleteClick={handleDeleteContact}
            />

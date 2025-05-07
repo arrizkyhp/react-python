@@ -2,7 +2,7 @@ import {ColumnDef, flexRender, getCoreRowModel, useReactTable} from "@tanstack/r
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table.tsx";
 import {Button, buttonVariants} from "@/components/ui/button.tsx";
 import {type VariantProps} from "class-variance-authority";
-import {Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
+import {Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select.tsx";
 
 type ButtonVariant = VariantProps<typeof buttonVariants>["variant"];
 
@@ -25,7 +25,9 @@ interface Pagination {
     onPageChange: (page: number) => void;
     currentPage: number;
     totalPages: number;
+    totalItems: number;
     onPageSizeChange: (pageSize: number) => void;
+    per_page?: string
 }
 
 const DataTable = <TData, TValue>(
@@ -35,20 +37,49 @@ const DataTable = <TData, TValue>(
         rowActions = [],
         pagination
     }: DataTableProps<TData, TValue>) => {
+
+    // Define the "No" column
+    const noColumn: ColumnDef<TData, number> = {
+        header: "No",
+        cell: ({ row }) => {
+            const pageSize = Number(pagination?.per_page || 10);
+            const currentPage = pagination?.currentPage || 1;
+            // Calculate the sequential number
+            return (currentPage - 1) * pageSize + row.index + 1;
+        },
+        // Optional: Set a fixed width for the "No" column
+        size: 30, // Reduced size
+        maxSize: 30, // Reduced maxSize
+        minSize: 30, // Added minSize for consistency
+    };
+
+    // Combine the "No" column with the provided columns
+    const combinedColumns: ColumnDef<TData, any>[] = [noColumn, ...columns];
+
     const table = useReactTable({
         data,
-        columns,
+        columns: combinedColumns,
         getCoreRowModel: getCoreRowModel(),
     })
+
+    const startIndex = pagination ? (pagination.currentPage - 1) * Number(pagination.per_page || 10) + 1 : 0;
+    const endIndex = pagination ? Math.min(startIndex + data.length - 1, pagination.totalItems) : 0;
+
+    // Calculate the minimum height for the table body
+    const minTableBodyHeight = `${Number(pagination?.per_page || 10) * 53}px`; // Assuming ~45px per row
+
 
     return   (
         <div className="flex flex-col gap-2">
             <div>
-                <Select onValueChange={(value) => {
-                    if (pagination && pagination.onPageSizeChange) {
-                        pagination.onPageSizeChange(Number(value));
-                    }
-                }}>
+                <Select
+                    onValueChange={(value) => {
+                        if (pagination && pagination.onPageSizeChange) {
+                            pagination.onPageSizeChange(Number(value));
+                        }
+                    }}
+                    defaultValue={pagination?.per_page || '10'}
+                >
                     <SelectTrigger className="w-[180px]">
                         <SelectValue placeholder="Select page size" /> {/* Changed placeholder */}
                     </SelectTrigger>
@@ -63,8 +94,9 @@ const DataTable = <TData, TValue>(
                 </Select>
             </div>
             <div className="rounded-md border">
-                <Table>
+                <Table className="w-full">
                     <TableHeader>
+
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => {
@@ -85,7 +117,7 @@ const DataTable = <TData, TValue>(
                             </TableRow>
                         ))}
                     </TableHeader>
-                    <TableBody>
+                    <TableBody style={{ minHeight: minTableBodyHeight }}>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
@@ -127,28 +159,41 @@ const DataTable = <TData, TValue>(
                     </TableBody>
                 </Table>
             </div>
-            {pagination && (
-                <div className="flex items-center justify-end space-x-2 py-4">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
-                        disabled={pagination.currentPage <= 1}
-                    >
-                        Previous
-                    </Button>
-                    {/* You could add page number indicators here */}
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
-                        disabled={pagination.currentPage >= pagination.totalPages}
-                    >
-                        Next
-                    </Button>
-                    {/* Add page size select if onPageSizeChange is provided */}
-                </div>
-            )}
+           <div className="flex justify-between w-full items-center">
+               <div>
+                   {pagination && pagination.totalItems > 0 ? (
+                       <>
+                           Showing {startIndex} to {endIndex} of {pagination.totalItems} results.
+                       </>
+                   ) : (
+                       <>
+                           No results.
+                       </>
+                   )}
+               </div>
+               {pagination && (
+                   <div className="flex items-center justify-end space-x-2 py-4">
+                       <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
+                           disabled={pagination.currentPage <= 1}
+                       >
+                           Previous
+                       </Button>
+                       {/* You could add page number indicators here */}
+                       <Button
+                           variant="outline"
+                           size="sm"
+                           onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
+                           disabled={pagination.currentPage >= pagination.totalPages}
+                       >
+                           Next
+                       </Button>
+                       {/* Add page size select if onPageSizeChange is provided */}
+                   </div>
+               )}
+           </div>
         </div>
     )
 }

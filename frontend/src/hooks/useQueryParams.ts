@@ -13,7 +13,7 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
     const location = useLocation();
     const [queryParams, setQueryParams] = useState<BaseQueryParams>({
         page: 1,
-        per_page: '5',
+        per_page: '10',
     });
 
     const updateQueryParams = (queryObject: Partial<BaseQueryParams>) => { // Use Partial for partial updates

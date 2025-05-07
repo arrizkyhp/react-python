@@ -14,12 +14,10 @@ interface ContactProps {
 const ContactList = ({  onEditClick, onDeleteClick }: ContactProps) => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
 
-    const { data, isLoading} = useQuery({
+    const { data} = useQuery({
         queryKey: ['contacts', queryParams],
         queryFn: () => fetchContacts(queryParams),
     })
-
-    console.log(data);
 
     return (
         <div>
@@ -43,6 +41,7 @@ const ContactList = ({  onEditClick, onDeleteClick }: ContactProps) => {
                 pagination={{
                     currentPage: data?.pagination.current_page || 1,
                     totalPages: data?.pagination.total_pages || 1,
+                    totalItems: data?.pagination.total_items || 0,
                     onPageChange: onPageChange,
                     onPageSizeChange: onPageSizeChange
                 }}
