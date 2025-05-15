@@ -1,0 +1,1 @@
+from backend.app.models.contact import Contact
