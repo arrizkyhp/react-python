@@ -19,7 +19,7 @@ app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 # --- API Endpoints ---
 
-@app.route("/api/contacts", methods=["GET"])
+@app.route("/api/contacts", methods=["GET"], strict_slashes=False)
 def get_contacts():
 
     page = request.args.get("page", 1, type=int)
