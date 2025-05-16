@@ -24,6 +24,11 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///databaselocal.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SECRET_KEY"] = "your_very_secret_key_here"
+    
+    # Cookie settings for cross-site requests
+    app.config["SESSION_COOKIE_SAMESITE"] = "None"
+    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
 
     db.init_app(app)
     login_manager.init_app(app)  # Initialize LoginManager with the app
@@ -38,4 +43,3 @@ def create_app():
         return User.query.get(int(user_id))
 
     return app
-

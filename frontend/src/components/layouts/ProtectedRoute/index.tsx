@@ -42,7 +42,7 @@ export const RedirectIfAuthenticated = () => {
 
     // Redirect to dashboard if already authenticated
     if (data?.logged_in) {
-        return <Navigate to="/contacts" replace />;
+        return <Navigate to="/user" replace />;
     }
 
     // Render child routes if not authenticated

@@ -8,6 +8,7 @@ import UserPage from "@/pages/User/UserPage.tsx";
 import ContactPage from "@/pages/Contact/ContactPage.tsx";
 import LayoutWithSidebar from "@/components/layouts/LayoutWithSidebar";
 import LoginPage from "@/pages/Login/LoginPage.tsx";
+import {RedirectIfAuthenticated} from "@/components/layouts/ProtectedRoute";
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -27,14 +28,16 @@ const router = createBrowserRouter([
         ]
     },
     {
-        // This is a separate top-level route for the Login page.
-        // It does not use LayoutWithSidebar, so SidebarProvider will not be applied.
-        path: "Login",
-        // You should ideally use a dedicated LoginPage component here
-        // For now, using UserPage as per your original setup for /Login
-        element: <LoginPage />,
-        // element: <LoginPage />, // Example if you have a LoginPage
-    }
+        path: '/',
+        element: <RedirectIfAuthenticated />,
+        children: [
+            {
+                path: '/login',
+                element: <LoginPage />,
+            },
+            // Add more public routes here that should redirect if logged in
+        ],
+    },
 ]);
 
 createRoot(document.getElementById('root')!).render(
