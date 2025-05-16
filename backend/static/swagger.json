@@ -2,22 +2,33 @@
   "swagger": "2.0",
   "info": {
     "version": "1.0.0",
-    "title": "Contact API"
+    "title": "Contact API with Authentication"
   },
   "basePath": "/api",
   "tags": [
     {
       "name": "Contact",
-      "description": "Operations related to contacts"
+      "description": "Operations related to contacts (Authentication Required)"
+    },
+    {
+      "name": "Authentication",
+      "description": "User registration, login, logout, and status"
     }
   ],
+  "securityDefinitions": {
+    "cookieAuth": {
+      "type": "apiKey",
+      "name": "session",
+      "in": "cookie",
+      "description": "Session cookie obtained after successful login. Handled automatically by the browser."
+    }
+  },
   "paths": {
     "/contacts": {
       "get": {
         "summary": "Get a list of contacts.",
-        "tags": [
-          "Contact"
-        ],
+        "tags": ["Contact"],
+        "security": [{ "cookieAuth": [] }],
         "parameters": [
           {
             "name": "page",
@@ -42,226 +53,299 @@
               "properties": {
                 "contacts": {
                   "type": "array",
-                  "items": {
-                    "$ref": "#/definitions/Contact"
-                  }
+                  "items": { "$ref": "#/definitions/Contact" }
                 },
-                "pagination": {
-                  "type": "object",
-                  "properties": {
-                    "total_items": {
-                      "type": "integer"
-                    },
-                    "total_pages": {
-                      "type": "integer"
-                    },
-                    "current_page": {
-                      "type": "integer"
-                    },
-                    "per_page": {
-                      "type": "integer"
-                    },
-                    "has_next": {
-                      "type": "boolean"
-                    },
-                    "has_prev": {
-                      "type": "boolean"
-                    },
-                    "next_num": {
-                      "type": "integer",
-                      "nullable": true
-                    },
-                    "prev_num": {
-                      "type": "integer",
-                      "nullable": true
-                    }
-                  }
-                }
+                "pagination": { "$ref": "#/definitions/Pagination" }
               }
             }
-          }
+          },
+          "401": { "$ref": "#/responses/UnauthorizedError" }
         }
       },
       "post": {
-      "summary": "Create a new contact.",
-       "tags": [
-        "Contact"
-      ],
-      "parameters": [
-        {
-          "name": "body",
-          "in": "body",
-          "required": true,
-          "schema": {
-            "type": "object",
-            "required": [
-              "firstName",
-              "lastName",
-              "email"
-            ],
-            "properties": {
-              "firstName": {
-                "type": "string",
-                "description": "The first name of the contact."
-              },
-              "lastName": {
-                "type": "string",
-                "description": "The last name of the contact."
-              },
-              "email": {
-                "type": "string",
-                "description": "The email address of the contact (must be unique)."
+        "summary": "Create a new contact.",
+        "tags": ["Contact"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ContactInput" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Contact Created!",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "contact": { "$ref": "#/definitions/Contact" }
               }
             }
+          },
+          "400": { "$ref": "#/responses/BadRequestError" },
+          "401": { "$ref": "#/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/contacts/{contact_id}": {
+      "patch": {
+        "summary": "Update an existing contact.",
+        "tags": ["Contact"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "contact_id",
+            "in": "path",
+            "type": "integer",
+            "required": true,
+            "description": "The ID of the contact to update."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/ContactUpdateInput" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact Updated.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "contact": { "$ref": "#/definitions/Contact" }
+              }
+            }
+          },
+          "400": { "$ref": "#/responses/BadRequestError" },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "404": { "$ref": "#/responses/NotFoundError" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a contact.",
+        "tags": ["Contact"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "contact_id",
+            "in": "path",
+            "type": "integer",
+            "required": true,
+            "description": "The ID of the contact to delete."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact deleted!",
+            "schema": { "$ref": "#/definitions/SuccessMessage" }
+          },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "404": { "$ref": "#/responses/NotFoundError" }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user.",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserRegistrationInput" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User registered successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "user": { "$ref": "#/definitions/User" }
+              }
+            }
+          },
+          "400": { "$ref": "#/responses/BadRequestError" },
+          "409": { "$ref": "#/responses/ConflictError" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Log in an existing user.",
+        "tags": ["Authentication"],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserLoginInput" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "user": { "$ref": "#/definitions/User" }
+              }
+            }
+          },
+          "400": { "$ref": "#/responses/BadRequestError" },
+          "401": {
+            "description": "Invalid credentials.",
+            "schema": { "$ref": "#/definitions/ErrorMessage" }
           }
         }
-      ],
-      "responses": {
-        "201": {
-          "description": "User Created!",
-          "schema": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Log out the current user.",
+        "tags": ["Authentication"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Logout successful.",
+            "schema": { "$ref": "#/definitions/SuccessMessage" }
+          },
+          "401": { "$ref": "#/responses/UnauthorizedError" }
+        }
+      }
+    },
+    "/auth/status": {
+      "get": {
+        "summary": "Check the current user's login status.",
+        "tags": ["Authentication"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User status.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "logged_in": { "type": "boolean" },
+                "user": { "$ref": "#/definitions/User" }
               }
             }
-          }
-        },
-        "400": {
-          "description": "Invalid input or email already exists.",
-          "schema": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
+          },
+          "401": {
+            "description": "User is not logged in (this might not be hit if security middleware redirects first, but good to document)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "logged_in": { "type": "boolean", "example": false }
               }
             }
           }
         }
       }
     }
-    },
-"/contacts/{user_id}": {
-    "patch": {
-      "summary": "Update an existing contact.",
-       "tags": [
-        "Contact"
-      ],
-      "parameters": [
-        {
-          "name": "user_id",
-          "in": "path",
-          "type": "integer",
-          "required": true,
-          "description": "The ID of the contact to update."
-        },
-        {
-          "name": "body",
-          "in": "body",
-          "required": true,
-          "schema": {
-            "type": "object",
-            "properties": {
-              "firstName": {
-                "type": "string",
-                "description": "The updated first name of the contact."
-              },
-              "lastName": {
-                "type": "string",
-                "description": "The updated last name of the contact."
-              },
-              "email": {
-                "type": "string",
-                "description": "The updated email address of the contact (must be unique)."
-              }
-            }
-          }
-        }
-      ],
-      "responses": {
-        "200": {
-          "description": "User Updated.",
-          "schema": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "404": {
-          "description": "User not found.",
-          "schema": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    },
-    "delete": {
-      "summary": "Delete a contact.",
-      "tags": [
-        "Contact"
-      ],
-      "parameters": [
-        {
-          "name": "user_id",
-          "in": "path",
-          "type": "integer",
-          "required": true,
-          "description": "The ID of the contact to delete."
-        }
-      ],
-      "responses": {
-        "200": {
-          "description": "User deleted!",
-          "schema": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "404": {
-          "description": "User not found.",
-          "schema": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
   },
   "definitions": {
     "Contact": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "integer"
-        },
-        "firstName": {
-          "type": "string"
-        },
-        "lastName": {
-          "type": "string"
-        },
-        "email": {
-          "type": "string"
-        }
+        "id": { "type": "integer" },
+        "firstName": { "type": "string" },
+        "lastName": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
       }
+    },
+    "ContactInput": {
+      "type": "object",
+      "required": ["firstName", "lastName", "email"],
+      "properties": {
+        "firstName": { "type": "string", "description": "The first name of the contact." },
+        "lastName": { "type": "string", "description": "The last name of the contact." },
+        "email": { "type": "string", "format": "email", "description": "The email address of the contact." }
+      }
+    },
+    "ContactUpdateInput": {
+      "type": "object",
+      "properties": {
+        "firstName": { "type": "string", "description": "The updated first name of the contact." },
+        "lastName": { "type": "string", "description": "The updated last name of the contact." },
+        "email": { "type": "string", "format": "email", "description": "The updated email address of the contact." }
+      }
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "total_items": { "type": "integer" },
+        "total_pages": { "type": "integer" },
+        "current_page": { "type": "integer" },
+        "per_page": { "type": "integer" },
+        "has_next": { "type": "boolean" },
+        "has_prev": { "type": "boolean" },
+        "next_num": { "type": "integer", "nullable": true },
+        "prev_num": { "type": "integer", "nullable": true }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "username": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      }
+    },
+    "UserRegistrationInput": {
+      "type": "object",
+      "required": ["username", "email", "password"],
+      "properties": {
+        "username": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "password": { "type": "string", "format": "password" }
+      }
+    },
+    "UserLoginInput": {
+      "type": "object",
+      "required": ["identifier", "password"],
+      "properties": {
+        "identifier": { "type": "string", "description": "Username or email" },
+        "password": { "type": "string", "format": "password" },
+        "remember": { "type": "boolean", "default": false }
+      }
+    },
+    "SuccessMessage": {
+      "type": "object",
+      "properties": {
+        "message": { "type": "string" }
+      }
+    },
+    "ErrorMessage": {
+      "type": "object",
+      "properties": {
+        "message": { "type": "string" }
+      }
+    }
+  },
+  "responses": {
+    "UnauthorizedError": {
+      "description": "Authentication information is missing or invalid. User is not logged in.",
+      "schema": { "$ref": "#/definitions/ErrorMessage" }
+    },
+    "NotFoundError": {
+      "description": "The requested resource was not found.",
+      "schema": { "$ref": "#/definitions/ErrorMessage" }
+    },
+    "BadRequestError": {
+      "description": "Invalid input provided.",
+      "schema": { "$ref": "#/definitions/ErrorMessage" }
+    },
+    "ConflictError": {
+      "description": "Resource already exists (e.g., username or email).",
+      "schema": { "$ref": "#/definitions/ErrorMessage" }
     }
   }
 }

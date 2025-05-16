@@ -1,11 +1,16 @@
 from flask import Blueprint, request, jsonify, make_response
 from backend.app.config import db
 from backend.app.models import Contact
+from flask_login import login_required, current_user
 
 contacts_bp = Blueprint('contacts', __name__)
 
 @contacts_bp.route("/contacts", methods=["GET"], strict_slashes=False)
+@login_required
 def get_contacts():
+    # If you linked contacts to users:
+    # contacts_query = Contact.query.filter_by(user_id=current_user.id)
+    # else, it shows all contacts (consider if this is desired for a multi-user app)
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
 
@@ -32,6 +37,7 @@ def get_contacts():
     return response
 
 @contacts_bp.route("/contacts", methods=["POST"])
+@login_required
 def create_contact():
     first_name = request.json.get("firstName")
     last_name = request.json.get("lastName")
@@ -53,9 +59,13 @@ def create_contact():
 
     return jsonify({"message": "User Created!"}), 201
 
-@contacts_bp.route("/contacts/<int:user_id>", methods=["PATCH"])
-def update_contact(user_id):
-    contact = Contact.query.get(user_id)
+@contacts_bp.route("/contacts/<int:contact_id>", methods=["PATCH"])
+@login_required
+def update_contact(contact_id):
+    # If contacts are user-specific, ensure the user owns this contact
+    # contact = Contact.query.filter_by(id=contact_id, user_id=current_user.id).first()
+    # else:
+    contact = Contact.query.get(contact_id)
 
     if not contact:
         return jsonify({"message": "User not found"}), 404
@@ -69,9 +79,10 @@ def update_contact(user_id):
 
     return jsonify({"message": "User Updated"}), 200
 
-@contacts_bp.route("/contacts/<int:user_id>", methods=["DELETE"])
-def delete_contact(user_id):
-    contact = Contact.query.get(user_id)
+@contacts_bp.route("/contacts/<int:contact_id>", methods=["DELETE"])
+@login_required
+def delete_contact(contact_id):
+    contact = Contact.query.get(contact_id)
 
     if not contact:
         return jsonify({"message": "User not found"}), 404

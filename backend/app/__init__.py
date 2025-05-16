@@ -17,10 +17,15 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
+
 # Create database tables
 with app.app_context():
     db.create_all()
 
-def register_blueprints():
+def register_blueprints(app_instance): # Pass the app instance
     from backend.app.api.contacts import contacts_bp
-    app.register_blueprint(contacts_bp, url_prefix='/api')
+    # We will create auth_bp soon
+    from backend.app.api.auth import auth_bp # Placeholder for auth blueprint
+
+    app_instance.register_blueprint(contacts_bp, url_prefix="/api") # Add a prefix like /api
+    app_instance.register_blueprint(auth_bp, url_prefix="/api/auth") # Auth routes
