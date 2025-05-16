@@ -15,7 +15,11 @@ def unauthorized():
 
 def create_app():
     app = Flask(__name__, static_folder="../static")
-    CORS(app, supports_credentials=True)
+    CORS(
+        app,
+        supports_credentials=True,
+        origins=["http://localhost:5173", "http://127.0.0.1:5173"]
+    )
 
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///databaselocal.db"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

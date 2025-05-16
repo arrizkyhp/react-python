@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import './App.css'
-import AppSidebar from './components/layout/AppSidebar'
+import AppSidebar from './components/layouts/AppSidebar'
 import { SidebarTrigger } from './components/ui/sidebar'
 
 // !TODO ADD DATA_TABLE
