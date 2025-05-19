@@ -24,7 +24,7 @@
     }
   },
   "paths": {
-    "/contacts": {
+    "/app/contacts": {
       "get": {
         "summary": "Get a list of contacts.",
         "tags": ["Contact"],
@@ -90,7 +90,7 @@
         }
       }
     },
-    "/contacts/{contact_id}": {
+    "/app/contacts/{contact_id}": {
       "patch": {
         "summary": "Update an existing contact.",
         "tags": ["Contact"],

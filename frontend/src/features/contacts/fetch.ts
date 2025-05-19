@@ -12,7 +12,9 @@ export const fetchContacts = async (params: BaseQueryParams): Promise<FetchConta
         per_page: params.per_page?.toString() || '10',
     }).toString();
 
-    const response = await fetch(`http://127.0.0.1:5000/api/contacts?${queryString}`);
+    const response = await fetch(`http://127.0.0.1:5000/api/app/contacts?${queryString}`, {
+      credentials: "include",
+    });
 
     if (!response.ok) {
         throw new Error('Failed to fetch contacts');
@@ -21,10 +23,11 @@ export const fetchContacts = async (params: BaseQueryParams): Promise<FetchConta
 };
 
 export const createContact = async (contactData: Omit<Contact, 'id'>): Promise<Contact> => {
-    const response = await fetch('http://127.0.0.1:5000/api/contacts', {
+    const response = await fetch('http://127.0.0.1:5000/api/app/contacts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(contactData),
+        credentials: "include",
     });
     if (!response.ok) {
         const data = await response.json();
@@ -34,10 +37,11 @@ export const createContact = async (contactData: Omit<Contact, 'id'>): Promise<C
 };
 
 export const updateContact = async (id: number, contactData: Partial<Omit<Contact, 'id'>>): Promise<Contact> => {
-    const response = await fetch(`http://127.0.0.1:5000/api/contacts/${id}`, {
+    const response = await fetch(`http://127.0.0.1:5000/api/app/contacts/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(contactData),
+        credentials: "include",
     });
     if (!response.ok) {
         const data = await response.json();
@@ -47,8 +51,9 @@ export const updateContact = async (id: number, contactData: Partial<Omit<Contac
 };
 
 export const deleteContact = async (id: number): Promise<void> => {
-    const response = await fetch(`http://127.0.0.1:5000/api/contacts/${id}`, {
+    const response = await fetch(`http://127.0.0.1:5000/api/app/contacts/${id}`, {
         method: 'DELETE',
+        credentials: "include",
     });
     if (!response.ok) {
         const data = await response.json();

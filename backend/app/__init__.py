@@ -27,5 +27,5 @@ def register_blueprints(app_instance): # Pass the app instance
     # We will create auth_bp soon
     from backend.app.api.auth import auth_bp # Placeholder for auth blueprint
 
-    app_instance.register_blueprint(contacts_bp, url_prefix="/api") # Add a prefix like /api
+    app_instance.register_blueprint(contacts_bp, url_prefix="/api/app") # Add a prefix like /api
     app_instance.register_blueprint(auth_bp, url_prefix="/api/auth") # Auth routes
