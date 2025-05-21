@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {loginFetch} from "@/features/login/fetch.ts";
+import {login} from "@/features/login/fetch.ts";
 import {toast} from "sonner";
 import {useNavigate} from "react-router-dom";
 
@@ -43,7 +43,7 @@ const LoginPage = () => {
     });
 
     const loginMutation = useMutation({
-        mutationFn: loginFetch,
+        mutationFn: login,
         onSuccess: () => {
             toast('Login successfully!', {
                 position: "top-center",

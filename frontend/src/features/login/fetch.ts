@@ -1,19 +1,25 @@
+import api from '@/lib/axios.ts';
+
 interface FetchLoginResponse {
     identifier: string;
     password: string;
     remember: boolean;
 }
 
-export const loginFetch = async (loginData: FetchLoginResponse) => {
-    const response = await fetch('http://127.0.0.1:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(loginData),
-        credentials: "include",
-    });
-    if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Failed to login');
-    }
-    return response.json();
+interface LoginSuccessResponse {
+    message: string;
+    user: {
+        id: number;
+        username: string;
+        email: string;
+    };
 }
+
+export const login = async (loginData: FetchLoginResponse): Promise<LoginSuccessResponse> => {
+    const response = await api.post<LoginSuccessResponse>('/auth/login', loginData); // Full path after base
+    return response.data;
+};
+
+export const logout = async (): Promise<void> => {
+    await api.post('/auth/logout');
+};

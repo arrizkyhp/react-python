@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import {logout} from "@/features/login/fetch.ts";
 
 interface AuthStatusResponse {
   logged_in: boolean;
@@ -20,20 +21,6 @@ export const checkAuthStatus = async (): Promise<AuthStatusResponse> => {
   return response.json();
 };
 
-// Logout function
-export const logoutUser = async (): Promise<void> => {
-  const response = await fetch("http://127.0.0.1:5000/api/auth/logout", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.message || "Failed to logout");
-  }
-};
-
 // React Query hooks
 export const useAuthStatus = () => {
   const query = useQuery({
@@ -45,7 +32,7 @@ export const useAuthStatus = () => {
   });
 
   const logoutMutation = useMutation({
-    mutationFn: logoutUser,
+    mutationFn: logout,
     onSuccess: () => {
       // Invalidate auth status query after successful logout
       query.refetch();
