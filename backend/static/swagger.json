@@ -55,7 +55,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "contacts": {
+                "items": {
                   "type": "array",
                   "items": { "$ref": "#/definitions/Contact" }
                 },

@@ -36,7 +36,7 @@ const ContactPage = () => {
                 icon: <Check />
             });
             // Invalidate and refetch the contacts query
-            queryClient.invalidateQueries({ queryKey: ['contacts'] });
+            queryClient.invalidateQueries({ queryKey: ['listContacts'] });
             // Clear form and close sheet
             setFirstName('');
             setLastName('');

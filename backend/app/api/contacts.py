@@ -31,7 +31,7 @@ def get_contacts():
         "prev_num": pagination.prev_num,
     }
 
-    response_data = {"contacts": json_contacts, "pagination": pagination_metadata}
+    response_data = {"items": json_contacts, "pagination": pagination_metadata}
     response = make_response(jsonify(response_data))
 
     return response

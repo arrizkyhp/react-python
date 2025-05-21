@@ -1,29 +1,31 @@
-import {Contact} from "@/types/contact.ts";
 import { columns } from "./ContactList.constants";
 import DataTable from "@/components/ui/DataTable";
 import {PencilIcon, TrashIcon} from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import {fetchContacts} from "@/features/contacts/fetch.ts";
 import useQueryParams from "@/hooks/useQueryParams.ts";
-
-interface ContactProps {
-    onEditClick: (contact: Contact) => void;
-    onDeleteClick: (contact: Contact) => void;
-}
+import useGetData from "@/hooks/useGetData.ts";
+import {FetchContactsResponse, ContactProps} from "./ContactList.types.ts";
+import {BaseQueryParams} from "@/types/responses.ts";
+import createQueryParams from "@/utils/createQueryParams.ts";
 
 const ContactList = ({  onEditClick, onDeleteClick }: ContactProps) => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
 
-    const { data} = useQuery({
-        queryKey: ['contacts', queryParams],
-        queryFn: () => fetchContacts(queryParams),
-    })
+    const { data } = useGetData<FetchContactsResponse, BaseQueryParams>(
+        ['listContacts', createQueryParams(queryParams || {})],
+        '/app/contacts',
+        {
+            params: {
+                page: queryParams.page,
+                per_page: queryParams.per_page || '10',
+            },
+        }
+    )
 
     return (
         <div>
             <DataTable
                 columns={columns}
-                data={data?.contacts || []}
+                data={data?.items || []}
                 rowActions={[
                     {
                         color: "secondary",
