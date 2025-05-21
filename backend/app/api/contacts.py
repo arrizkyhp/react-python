@@ -49,6 +49,13 @@ def create_contact():
             400,
         )
 
+    existing_contact = Contact.query.filter_by(email=email).first()
+    if existing_contact:
+        return (
+            jsonify({"message": "A contact with this email already exists"}),
+            409
+        )
+
     new_contact = Contact(first_name=first_name, last_name=last_name, email=email)
 
     try:
@@ -71,6 +78,16 @@ def update_contact(contact_id):
         return jsonify({"message": "User not found"}), 404
 
     data = request.json
+    new_email = data.get("email")
+
+    if new_email and new_email != contact.email:
+        existing_contact_with_new_email = Contact.query.filter(
+            Contact.email == new_email,
+            Contact.id != contact_id  # Exclude the current contact being updated
+        ).first()
+        if existing_contact_with_new_email:
+            return jsonify({"message": "A contact with this email already exists"}), 409
+
     contact.first_name = data.get("firstName", contact.first_name)
     contact.last_name = data.get("lastName", contact.last_name)
     contact.email = data.get("email", contact.email)
