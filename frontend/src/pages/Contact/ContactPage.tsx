@@ -9,16 +9,13 @@ import {
     AlertDialogHeader,
     AlertDialogTitle
 } from "@/components/ui/alert-dialog.tsx";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {FormEvent, useState} from "react";
-import {createContact, deleteContact, updateContact} from "@/features/contacts/fetch.ts";
 import {toast} from "sonner";
 import {Check} from "lucide-react";
 import type {Contact} from "@/types/contact.ts";
+import {useDeleteData, usePatchData, usePostData} from "@/hooks/useMutateData.ts";
 
 const ContactPage = () => {
-    const queryClient = useQueryClient();
-
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -28,65 +25,82 @@ const ContactPage = () => {
     const [contactToDeleteId, setContactToDeleteId] = useState<number | null>(null); // State for contact ID to delete
     const [contactToDeleteName, setContactToDeleteName] = useState<string | null>(null); // New state for contact name to delete
 
-    const createContactMutation = useMutation({
-        mutationFn: createContact,
-        onSuccess: () => {
-            toast('Contact created successfully!', {
-                position: 'top-center',
-                icon: <Check />
-            });
-            // Invalidate and refetch the contacts query
-            queryClient.invalidateQueries({ queryKey: ['listContacts'] });
-            // Clear form and close sheet
-            setFirstName('');
-            setLastName('');
-            setEmail('');
-            setIsSheetOpen(false);
-        },
-        onError: (error: Error) => {
-            alert(`Error creating contact: ${error.message}`);
-        },
-    });
+    const {
+        mutate: createContactMutation,
+    } = usePostData<Contact, Omit<Contact, 'id'>>(
+        ['createContact'], // A unique key for this specific mutation operation
+        '/app/contacts', // The API endpoint
+        {
+            options: {
+                onSuccess: () => {
+                    toast('Contact created successfully!', {
+                        position: 'top-center',
+                        icon: <Check />,
+                    });
+                    // This invalidation is handled by `usePostData` due to `queryInvalidateKeys`
+                    // queryClient.invalidateQueries({ queryKey: ['contacts'] });
 
-    const updateContactMutation = useMutation({
-        mutationFn: ({ id, contactData }: { id: number, contactData: Partial<Omit<Contact, 'id'>> }) => updateContact(id, contactData),
-        onSuccess: () => {
-            toast('Contact updated successfully!', {
-                position: 'top-center',
-                icon: <Check />
-            });
-            // Invalidate and refetch the contacts query
-            queryClient.invalidateQueries({ queryKey: ['contacts'] });
-            // Clear form and close sheet
-            setEditingContactId(null);
-            setFirstName('');
-            setLastName('');
-            setEmail('');
-            setIsSheetOpen(false);
+                    // Clear form and close sheet
+                    setFirstName('');
+                    setLastName('');
+                    setEmail('');
+                    setIsSheetOpen(false);
+                },
+                onError: (err) => {
+                    alert(`Error creating contact: ${err.message}`);
+                    console.error('Create Contact Error:', err);
+                },
+            },
         },
-        onError: (error: Error) => {
-            alert(`Error updating contact: ${error.message}`);
-        },
-    });
+        ['listContacts'], // Invalidate the 'contacts' query key on success
+    );
 
-    const deleteContactMutation = useMutation({
-        mutationFn: deleteContact,
-        onSuccess: () => {
-            toast('Contact deleted successfully', {
-                position: 'top-center',
-                icon: <Check />
-            });
-            // Invalidate and refetch the contacts query
-            queryClient.invalidateQueries({ queryKey: ['contacts'] });
-            // Close the dialog
-            setIsAlertDialogOpen(false);
-            setContactToDeleteId(null);
-            setContactToDeleteName(null);
+    const {
+        mutate: updateContactMutation,
+    } = usePatchData(
+        ['updateContact', String(editingContactId)], // Mutation key
+        `/app/contacts/${editingContactId}`, // URL for this specific contact
+        {
+            options: {
+                onSuccess: () => {
+                    toast('Contact updated successfully!', {
+                        position: 'top-center',
+                        icon: <Check />
+                    });
+                    setEditingContactId(null);
+                    setFirstName('');
+                    setLastName('');
+                    setEmail('');
+                    setIsSheetOpen(false);
+                },
+                onError: (err) => toast(`Update failed: ${err.message}`),
+            },
         },
-        onError: (error: Error) => {
-            alert(`Error deleting contact: ${error.message}`);
+        ['listContacts'], // Invalidate contacts list and potentially individual contact detail
+    );
+
+    const {
+        mutate: deleteContactMutation,
+    } = useDeleteData<void, number>(
+        ['deleteContact', String(contactToDeleteId)], // Mutation key
+        `/app/contacts/${contactToDeleteId}`, // URL for this specific contact
+        {
+            options: {
+                onSuccess: () => {
+                    toast('Contact deleted successfully', {
+                        position: 'top-center',
+                        icon: <Check />
+                    });
+                    setIsAlertDialogOpen(false);
+                    setContactToDeleteId(null);
+                    setContactToDeleteName(null);
+
+                },
+                onError: (err) => toast(`Delete failed: ${err.message}`),
+            },
         },
-    });
+        ['listContacts'], // Invalidate the contacts list after deletion
+    );
 
     const handleOpenCreateSheet = () => {
         // Clear the form fields when opening for creation
@@ -113,7 +127,7 @@ const ContactPage = () => {
 
     const handleDeleteContactConfirm = async () => {
         if (contactToDeleteId !== null) {
-            deleteContactMutation.mutate(contactToDeleteId);
+            deleteContactMutation(contactToDeleteId);
         }
     }
 
@@ -127,9 +141,9 @@ const ContactPage = () => {
         }
 
         if (editingContactId) {
-            updateContactMutation.mutate({ id: editingContactId, contactData: data });
+            updateContactMutation(data);
         } else {
-            createContactMutation.mutate(data);
+            createContactMutation(data);
         }
     }
 

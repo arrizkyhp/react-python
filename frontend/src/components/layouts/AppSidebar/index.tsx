@@ -1,10 +1,4 @@
 import {
-  Calendar,
-  Home,
-  Inbox,
-  Search,
-  Settings,
-  UserRound,
   LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,39 +15,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
+import {menu} from "@/constants/menu.tsx";
 
-const items = [
-  {
-    title: "Home",
-    url: "/",
-    icon: Home,
-  },
-  {
-    title: "User",
-    url: "/user",
-    icon: UserRound,
-  },
-  {
-    title: "Inbox",
-    url: "/Test",
-    icon: Inbox,
-  },
-  {
-    title: "Calendar",
-    url: "#",
-    icon: Calendar,
-  },
-  {
-    title: "Search",
-    url: "#",
-    icon: Search,
-  },
-  {
-    title: "Settings",
-    url: "#",
-    icon: Settings,
-  },
-];
+
 
 const AppSidebar = () => {
   const { logout, isLoggingOut } = useAuthStatus();
@@ -78,7 +42,7 @@ const AppSidebar = () => {
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {menu.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <Link to={item.url}>

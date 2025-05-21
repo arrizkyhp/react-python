@@ -11,7 +11,6 @@ const useGetData = <T, TParam = BaseQueryParams>(
 ) => {
     const { options, params, normalizer } = extras || {};
 
-    console.log({params})
     const {
         enabled = true,
         initialData = undefined,
