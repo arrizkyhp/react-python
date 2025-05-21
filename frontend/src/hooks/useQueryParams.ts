@@ -1,6 +1,6 @@
 import { useState } from "react";
 import createQueryParams from "@/utils/createQueryParams.ts";
-import {BaseQueryParams} from "@/types/response.ts";
+import {BaseQueryParams} from "@/types/responses.ts";
 import {useLocation, useNavigate } from "react-router-dom";
 
 interface QueryParamsOptions {

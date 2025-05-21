@@ -1,5 +1,5 @@
 import { User } from "@/types/user";
-import {BaseQueryParams, PaginationInfo} from "@/types/response.ts";
+import {BaseQueryParams, PaginationInfo} from "@/types/responses.ts";
 import api from "@/lib/axios.ts";
 
 interface FetchUsersResponse {

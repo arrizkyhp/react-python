@@ -16,3 +16,10 @@ export interface PaginationInfo {
     total_items: number;
     total_pages: number;
 }
+
+export interface BaseError {
+    message?: string;
+    errors?: Record<string, string[]>;
+    code?: string;
+    status?: number;
+}
