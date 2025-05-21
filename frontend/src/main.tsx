@@ -25,6 +25,10 @@ const router = createBrowserRouter([
                 element: <UserPage />,
             },
             {
+                path: "Role", // The URL path for the about page
+                element: <UserPage />,
+            },
+            {
                 path: "Contact", // The URL path for the about page
                 element: <ContactPage />,
             },

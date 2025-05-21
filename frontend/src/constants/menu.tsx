@@ -1,4 +1,4 @@
-import {Calendar, Contact, Home, Inbox, Search, Settings, UserRound} from "lucide-react";
+import {Calendar, Contact, Home, Inbox, Search, Settings, ShieldUser, UserRound} from "lucide-react";
 
 export const menu = [
     {
@@ -10,6 +10,11 @@ export const menu = [
         title: "User",
         url: "/user",
         icon: UserRound,
+    },
+    {
+        title: "Role",
+        url: "/role",
+        icon: ShieldUser,
     },
     {
         title: "Contact",
