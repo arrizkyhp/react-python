@@ -32,7 +32,11 @@ def register_blueprints(app_instance): # Pass the app instance
     # We will create auth_bp soon
     from backend.app.api.auth import auth_bp # Placeholder for auth blueprint
     from backend.app.api.users import users_bp
+    from backend.app.api.roles import roles_bp
+    from backend.app.api.permissions import permissions_bp
 
     app_instance.register_blueprint(contacts_bp, url_prefix="/api/app")
     app_instance.register_blueprint(users_bp, url_prefix="/api/app")
+    app_instance.register_blueprint(roles_bp, url_prefix="/api/app")
+    app_instance.register_blueprint(permissions_bp, url_prefix="/api/app")
     app_instance.register_blueprint(auth_bp, url_prefix="/api/auth") # Auth routes
