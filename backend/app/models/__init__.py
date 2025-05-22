@@ -1,4 +1,6 @@
-from backend.app.models.contact import Contact
-from backend.app.models.user import User
+from .contact import Contact
+from .user import User, user_roles
+from .role import Role, role_permissions
+from .permission import Permission
 
-__all__ = ["Contact", "User"]
+__all__ = ["Contact", "User", "Role", "Permission"]

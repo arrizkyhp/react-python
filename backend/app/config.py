@@ -36,7 +36,7 @@ def create_app():
     login_manager.session_protection = "strong"  # Optional: for better security
 
     # Import models here to avoid circular imports if models need 'db'
-    from backend.app.models.user import User  # Import User model
+    from .models.user import User  # Import User model
 
     @login_manager.user_loader
     def load_user(user_id):

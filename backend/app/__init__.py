@@ -1,7 +1,12 @@
-from backend.app.config import create_app, db
 from flask_swagger_ui import get_swaggerui_blueprint
+from flask_migrate import Migrate
+from .config import create_app, db
 
 app = create_app()
+migrate = Migrate(app, db)
+
+# Make app available for Flask CLI
+cli = app.cli
 
 # --- Swagger UI Configuration ---
 SWAGGER_URL = '/swagger'
