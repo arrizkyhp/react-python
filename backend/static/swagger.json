@@ -63,7 +63,8 @@
               }
             }
           },
-          "401": { "$ref": "#/responses/UnauthorizedError" }
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" }
         }
       },
       "post": {
@@ -90,7 +91,9 @@
             }
           },
           "400": { "$ref": "#/responses/BadRequestError" },
-          "401": { "$ref": "#/responses/UnauthorizedError" }
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" },
+          "409": { "$ref": "#/responses/ConflictError" }
         }
       }
     },
@@ -127,7 +130,9 @@
           },
           "400": { "$ref": "#/responses/BadRequestError" },
           "401": { "$ref": "#/responses/UnauthorizedError" },
-          "404": { "$ref": "#/responses/NotFoundError" }
+          "403": { "$ref": "#/responses/ForbiddenError" },
+          "404": { "$ref": "#/responses/NotFoundError" },
+          "409": { "$ref": "#/responses/ConflictError" }
         }
       },
       "delete": {
@@ -149,6 +154,7 @@
             "schema": { "$ref": "#/definitions/SuccessMessage" }
           },
           "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" },
           "404": { "$ref": "#/responses/NotFoundError" }
         }
       }
@@ -396,6 +402,10 @@
   "responses": {
     "UnauthorizedError": {
       "description": "Authentication information is missing or invalid. User is not logged in.",
+      "schema": { "$ref": "#/definitions/ErrorMessage" }
+    },
+    "ForbiddenError": {
+      "description": "The user does not have the necessary permissions for a resource.",
       "schema": { "$ref": "#/definitions/ErrorMessage" }
     },
     "NotFoundError": {
