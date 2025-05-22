@@ -17,24 +17,31 @@ with app.app_context():
 
     # --- Create Permissions ---
     permissions_to_create = [
-        ('user.manage', 'Can create, edit, delete all users and their roles.'),
-        ('contact.create', 'Can create new contacts.'),
-        ('contact.read.own', 'Can read their own contacts.'),
-        ('contact.edit.own', 'Can edit their own contacts.'),
-        ('contact.delete.own', 'Can delete their own contacts.'),
-        ('contact.read.all', 'Can read all contacts.'),
-        ('contact.edit.all', 'Can edit all contacts.'),
-        ('contact.delete.all', 'Can delete all contacts.'),
-        ('role.manage', 'Can create, edit, delete roles and assign permissions to them.'),
-        ('permission.manage', 'Can create, edit, delete individual permissions.')
+        ('user.manage', 'Can create, edit, delete all users and their roles.', 'User Management'),
+        ('contact.create', 'Can create new contacts.', 'Contact Management'),
+        ('contact.read.own', 'Can read their own contacts.', 'Contact Management'),
+        ('contact.edit.own', 'Can edit their own contacts.', 'Contact Management'),
+        ('contact.delete.own', 'Can delete their own contacts.', 'Contact Management'),
+        ('contact.read.all', 'Can read all contacts.', 'Contact Management'),
+        ('contact.edit.all', 'Can edit all contacts.', 'Contact Management'),
+        ('contact.delete.all', 'Can delete all contacts.', 'Contact Management'),
+        ('role.manage', 'Can create, edit, delete roles and assign permissions to them.', 'Role Management'),
+        ('permission.manage', 'Can create, edit, delete individual permissions.', 'Permission Management')
     ]
 
-    for name, desc in permissions_to_create:
+    for name, desc, category in permissions_to_create:  # <-- Unpack the new 'category'
         perm = Permission.query.filter_by(name=name).first()
         if not perm:
-            perm = Permission(name=name, description=desc)
+            # Pass category to the Permission constructor
+            perm = Permission(name=name, description=desc, category=category)  # <-- Pass 'category' here
             db.session.add(perm)
-            print(f"Created permission: {name}")
+            print(f"Created permission: {name} (Category: {category})")
+        else:
+            if perm.description != desc or perm.category != category:
+                perm.description = desc
+                perm.category = category
+                db.session.add(perm)  # Re-add to session to mark as dirty
+                print(f"Updated permission: {name} (Category: {category})")
     db.session.commit()
 
     # Get all permissions for assignment
@@ -59,7 +66,7 @@ with app.app_context():
     # --- Assign Permissions to Roles ---
     # Admin gets all permissions
     if role_admin:
-        for perm_name, _ in permissions_to_create:
+        for perm_name, _, _ in permissions_to_create:  # Unpack to get just the name for existing check
             if all_permissions[perm_name] not in role_admin.permissions:
                 role_admin.permissions.append(all_permissions[perm_name])
                 print(f"Assigned {perm_name} to Admin role")

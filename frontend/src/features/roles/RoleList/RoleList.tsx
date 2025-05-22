@@ -6,9 +6,11 @@ import DataTable from "@/components/ui/DataTable";
 import { columns } from "./RoleList.constants";
 import {Role} from "@/types/role.ts";
 import {EyeIcon, PencilIcon, TrashIcon} from "lucide-react";
+import {useNavigate} from "react-router-dom";
 
 const RoleList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
+    const navigate = useNavigate();
 
     const { data } = useGetData<ListResponse<Role>, BaseQueryParams>(
         ['roleList', createQueryParams(queryParams || {})],
@@ -20,6 +22,10 @@ const RoleList = () => {
             },
         }
     )
+
+    const onDetailClick = (role: Role) => {
+        navigate(`${role.id}`);
+    }
 
     const onEditClick = () => {
         console.log("EDIT")
@@ -34,7 +40,7 @@ const RoleList = () => {
                     {
                         color: "secondary",
                         icon: <EyeIcon className="h-4 w-4" />,
-                        onClick: (contact) => onEditClick(),
+                        onClick: (role) => onDetailClick(role),
                         tooltip: "View",
                     },
                     {

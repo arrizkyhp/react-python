@@ -37,7 +37,7 @@ def get_roles():
 
 @roles_bp.route("/roles/<int:role_id>", methods=["GET"])
 @login_required
-@permission_required('role.read.all') # Or 'role.read.single' if you differentiate
+@permission_required('role.manage') # Or 'role.read.single' if you differentiate
 def get_role(role_id):
     role = Role.query.get(role_id)
     if not role:
@@ -79,7 +79,7 @@ def create_role():
 
 @roles_bp.route("/roles/<int:role_id>", methods=["PATCH"])
 @login_required
-@permission_required('role.update')
+@permission_required('role.manage')
 def update_role(role_id):
     role = Role.query.get(role_id)
     if not role:
