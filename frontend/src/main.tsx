@@ -9,6 +9,7 @@ import ContactPage from "@/pages/Contact/ContactPage.tsx";
 import LayoutWithSidebar from "@/components/layouts/LayoutWithSidebar";
 import LoginPage from "@/pages/Login/LoginPage.tsx";
 import {RedirectIfAuthenticated} from "@/components/layouts/ProtectedRoute";
+import RolePage from "@/pages/Role/RolePage.tsx";
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -26,7 +27,7 @@ const router = createBrowserRouter([
             },
             {
                 path: "Role", // The URL path for the about page
-                element: <UserPage />,
+                element: <RolePage />,
             },
             {
                 path: "Contact", // The URL path for the about page

@@ -23,3 +23,8 @@ export interface BaseError {
     code?: string;
     status?: number;
 }
+
+export interface ListResponse<T> {
+    items: T[];
+    pagination: PaginationInfo;
+}
