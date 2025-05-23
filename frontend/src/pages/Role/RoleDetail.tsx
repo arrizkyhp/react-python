@@ -1,19 +1,11 @@
-import {Link, useNavigate, useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import useGetData from "@/hooks/useGetData.ts";
 import {Role, Permission} from "@/types/role.ts";
-import {BaseQueryParams, ListResponse} from "@/types/responses.ts";
+import {BaseQueryParams} from "@/types/responses.ts";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {ArrowLeft, Check, Loader2} from "lucide-react";
+import {Check, Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator
-} from "@/components/ui/breadcrumb";
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card.tsx";
+import {Card, CardContent} from "@/components/ui/card.tsx";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -22,6 +14,7 @@ import {toast} from "sonner";
 import {useEffect, useState} from "react";
 import {Input} from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea";
+import PageHeader from "@/components/ui/PageHeader";
 
 const groupPermissionsByCategory = (
     permissions: Permission[],
@@ -71,7 +64,7 @@ const RoleDetailPage = () => {
         },
     );
 
-    const { data: roleData, isLoading, isError, error, refetch: refetchRoleData } = useGetData<
+    const { data: roleData, isLoading, isError, error } = useGetData<
         Role,
         BaseQueryParams
     >(
@@ -222,54 +215,41 @@ const RoleDetailPage = () => {
 
     return (
         <div className="flex flex-col mt-2 w-full">
-            <div className="flex justify-between items-center gap-2 w-full">
-                <div className="flex gap-2 items-start">
-                    <Button variant="ghost" size="icon" onClick={handleBack} className="mr-2">
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <div className="flex flex-col gap-1">
-                        <Breadcrumb>
-                            <BreadcrumbList>
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink href="/">Role</BreadcrumbLink>
-                                </BreadcrumbItem>
-                                <BreadcrumbSeparator />
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink>
-                                        <Link to={'/role'}>List</Link>
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                <BreadcrumbSeparator />
-                                <BreadcrumbItem>
-                                    <BreadcrumbPage>Detail</BreadcrumbPage>
-                                </BreadcrumbItem>
-                            </BreadcrumbList>
-                        </Breadcrumb>
-                        <h2 className="font-bold text-xl">{isEditing ? "Edit Role" : "Role Detail"}</h2>
-
-                    </div>
-
-                </div>
-                {isEditing ? (
-                    <div className="flex gap-2">
-                        <Button variant="outline" onClick={handleCancelClick} disabled={isUpdating}>
-                            Cancel
+            <PageHeader
+                title={isEditing ? "Edit Role" : "Role Detail"}
+                breadcrumbs={[
+                    { label: "Role", href: "/role" },
+                    { label: isEditing ? "Edit" : "Detail" },
+                ]}
+                onBack={handleBack}
+                actions={
+                    isEditing ? (
+                        <>
+                            <Button
+                                variant="outline"
+                                onClick={handleCancelClick}
+                                disabled={isUpdating}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                className="bg-green-600 hover:bg-green-700"
+                                onClick={handleSaveClick}
+                                disabled={isUpdating}
+                            >
+                                {isUpdating && (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                )}
+                                Save Changes
+                            </Button>
+                        </>
+                    ) : (
+                        <Button className="bg-green-600 hover:bg-green-700" onClick={handleEditClick}>
+                            Edit Role
                         </Button>
-                        <Button
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={handleSaveClick}
-                            disabled={isUpdating} // Disable while mutation is pending
-                        >
-                            {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Save Changes
-                        </Button>
-                    </div>
-                ) : (
-                    <Button className="bg-green-600 hover:bg-green-700" onClick={handleEditClick}>
-                        Edit Role
-                    </Button>
-                )}
-            </div>
+                    )
+                }
+            />
 
             <Card className="mt-6">
                 <CardContent>

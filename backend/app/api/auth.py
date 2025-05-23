@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, make_response
 from werkzeug.security import check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
-from backend.app.models import User # Adjusted import
+from backend.app.models import User, Role # Adjusted import
 from backend.app import db # Import db from app package __init__
 
 auth_bp = Blueprint('auth', __name__)
@@ -24,6 +24,15 @@ def register():
 
     new_user = User(username=username, email=email)
     new_user.set_password(password)
+
+    # --- Add this part to assign a default role ---
+    default_role = Role.query.filter_by(name='User').first()  # Assuming 'User' is your default role name
+    if default_role:
+        new_user.roles.append(default_role)
+    else:
+        # Handle the case where the default role doesn't exist
+        print("Warning: Default 'User' role not found in the database.")
+        # You might want to return an error or log this situation depending on your application logic
 
     try:
         db.session.add(new_user)

@@ -11,6 +11,7 @@ import LoginPage from "@/pages/Login/LoginPage.tsx";
 import {RedirectIfAuthenticated} from "@/components/layouts/ProtectedRoute";
 import RolePage from "@/pages/Role/RolePage.tsx";
 import RoleDetailPage from "@/pages/Role/RoleDetail.tsx";
+import RoleCreatePage from "@/pages/Role/RoleCreate.tsx";
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -35,7 +36,7 @@ const router = createBrowserRouter([
                     },
                     {
                         path: "create",
-                        element: <RolePage />,
+                        element: <RoleCreatePage />,
                     },
                     {
                         path: ":id",
@@ -43,7 +44,7 @@ const router = createBrowserRouter([
                     },
                     {
                         path: ":id/edit",
-                        element: <RolePage />,
+                        element: <RoleDetailPage />,
                     },
                 ]
             },

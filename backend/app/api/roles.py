@@ -46,7 +46,7 @@ def get_role(role_id):
 
 @roles_bp.route("/roles", methods=["POST"])
 @login_required
-@permission_required('role.create')
+@permission_required('role.manage')
 def create_role():
     name = request.json.get("name")
     description = request.json.get("description")
