@@ -122,7 +122,7 @@ def update_role(role_id):
 
 @roles_bp.route("/roles/<int:role_id>", methods=["DELETE"])
 @login_required
-@permission_required('role.delete')
+@permission_required('role.manage')
 def delete_role(role_id):
     role = Role.query.get(role_id)
     if not role:

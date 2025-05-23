@@ -5,12 +5,29 @@ import createQueryParams from "@/utils/createQueryParams.ts";
 import DataTable from "@/components/ui/DataTable";
 import { columns } from "./RoleList.constants";
 import {Role} from "@/types/role.ts";
-import {EyeIcon, PencilIcon, TrashIcon} from "lucide-react";
+import {Check, EyeIcon, PencilIcon, TrashIcon} from "lucide-react";
 import {useNavigate} from "react-router-dom";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle
+} from "@/components/ui/alert-dialog.tsx";
+import {Button} from "@/components/ui/button.tsx";
+import {useState} from "react";
+import {useDeleteData} from "@/hooks/useMutateData.ts";
+import {toast} from "sonner";
 
 const RoleList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
     const navigate = useNavigate();
+
+    const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
+    const [deleteRoleId, setDeleteRoleId] = useState('');
+    const [deleteRoleName, setDeleteRoleName] = useState('');
 
     const { data } = useGetData<ListResponse<Role>, BaseQueryParams>(
         ['roleList', createQueryParams(queryParams || {})],
@@ -23,12 +40,47 @@ const RoleList = () => {
         }
     )
 
+    const {
+        mutate: deleteRoleMutation,
+    } = useDeleteData<void, number>(
+        ['deleteContact', String(deleteRoleId)],
+        `/app/roles/${deleteRoleId}`,
+        {
+            options: {
+                onSuccess: () => {
+                    toast('Role deleted successfully', {
+                        position: 'top-center',
+                        icon: <Check />
+                    });
+                    setIsAlertDialogOpen(false);
+                    setDeleteRoleId('');
+                    setDeleteRoleName('');
+
+                },
+                onError: (err) => toast(`Delete failed: ${err.message}`),
+            },
+        },
+        ['roleList'], // Invalidate the contacts list after deletion
+    );
+
     const onDetailClick = (role: Role) => {
         navigate(`${role.id}`);
     }
 
     const onEditClick = (role: Role) => {
         navigate(`${role.id}/edit`); // Navigate directly to the edit URL
+    }
+
+    const onDeleteClick = (role: Role) => {
+        setDeleteRoleId(String(role.id))
+        setIsAlertDialogOpen(true)
+        setDeleteRoleName(role.name)
+    }
+
+    const handleDeleteRoleConfirm = () => {
+        if (deleteRoleId !== '') {
+            deleteRoleMutation(Number(deleteRoleId));
+        }
     }
 
     return (
@@ -52,7 +104,7 @@ const RoleList = () => {
                     {
                         color: "destructive",
                         icon: <TrashIcon className="h-4 w-4" />,
-                        onClick: (role) => onEditClick(role),
+                        onClick: (role) => onDeleteClick(role),
                         tooltip: "Delete",
                     },
                 ]}
@@ -64,6 +116,25 @@ const RoleList = () => {
                     onPageSizeChange: onPageSizeChange
                 }}
             />
+
+            <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to delete this contact?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the contact:
+                            <br/>
+                            <span className="font-bold"> {deleteRoleName}</span>.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction asChild>
+                            <Button variant="destructive" onClick={handleDeleteRoleConfirm} className="bg-red-600 hover:bg-red-700">Delete</Button>
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
