@@ -27,8 +27,8 @@ const RoleList = () => {
         navigate(`${role.id}`);
     }
 
-    const onEditClick = () => {
-        console.log("EDIT")
+    const onEditClick = (role: Role) => {
+        navigate(`${role.id}/edit`); // Navigate directly to the edit URL
     }
 
     return (
@@ -46,13 +46,13 @@ const RoleList = () => {
                     {
                         color: "default",
                         icon: <PencilIcon className="h-4 w-4" />,
-                        onClick: (contact) => onEditClick(),
+                        onClick: (role) => onEditClick(role),
                         tooltip: "Edit",
                     },
                     {
                         color: "destructive",
                         icon: <TrashIcon className="h-4 w-4" />,
-                        onClick: (contact) => onEditClick(),
+                        onClick: (role) => onEditClick(role),
                         tooltip: "Delete",
                     },
                 ]}
