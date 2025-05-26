@@ -27,8 +27,6 @@ const UserList = () => {
         }
     )
 
-
-
     const handleOpenAssignUser = (user: User) => {
         console.log(user)
         setIsSheetOpen(true);
@@ -47,9 +45,12 @@ const UserList = () => {
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetContent>
                         <UserAssignForm />
+
                     </SheetContent>
+
                 </Sheet>
             </div>
+
             <DataTable
                 columns={columns}
                 data={data?.items || []}

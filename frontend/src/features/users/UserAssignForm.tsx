@@ -1,12 +1,13 @@
-import { MultiSelect } from "@/components/ui/MultiSelect";
 import {SheetHeader} from "@/components/ui/sheet.tsx";
+import {MultiSelect} from "@/components/ui/MultiSelect";
+import {useState} from "react";
 import useGetData from "@/hooks/useGetData.ts";
 import {SelectOption} from "@/types/common.ts";
 import {Role} from "@/types/role.ts";
-import { useState } from "react";
+import { Label } from "@/components/ui/label";
+
 
 const UserAssignForm = () => {
-
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
 
     const { data: roleOptionsData } = useGetData<
@@ -19,25 +20,32 @@ const UserAssignForm = () => {
             })),
     });
 
-
-    console.log(roleOptionsData)
     const optionsRole = roleOptionsData || []
 
 
-    console.log("optionsRole", optionsRole)
+
+
     return (
         <>
             <SheetHeader>
                 <h2> Assign User Role </h2>
             </SheetHeader>
 
-            <MultiSelect
-                options={optionsRole}
-                selected={selectedRoles} // Pass the selectedRoles state
-                onSelectChange={setSelectedRoles} // Pass the state setter
-                placeholder="Select roles..."
-                // disabled={!user} // Disable if no user is selected
-            />
+            <div className="p-4">
+                <div className="grid gap-2">
+                    <Label>Roles</Label>
+                    <MultiSelect
+                        options={optionsRole}
+                        onValueChange={setSelectedRoles}
+                        placeholder="Select Roles"
+                        value={selectedRoles}
+                        variant="inverted"
+                        maxCount={3}
+                    />
+                </div>
+
+
+            </div>
 
 
         </>
