@@ -26,7 +26,6 @@ const ContactForm = (props: ContactFormProps) => {
        isEdit,
    } = props;
 
-
     return (
             <div >
                 <SheetHeader>
