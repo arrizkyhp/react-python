@@ -308,6 +308,45 @@
         }
       }
     },
+    "/app/users/{user_id}": {
+      "patch": {
+        "summary": "Update an existing user's details and/or roles.",
+        "tags": ["User"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "type": "integer",
+            "required": true,
+            "description": "The ID of the user to update."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/UserUpdateInput" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User updated successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "user": { "$ref": "#/definitions/User" }
+              }
+            }
+          },
+          "400": { "$ref": "#/responses/BadRequestError" },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" },
+          "404": { "$ref": "#/responses/NotFoundError" },
+          "409": { "$ref": "#/responses/ConflictError" }
+        }
+      }
+    },
     "/app/users/{user_id}/roles": {
       "post": {
         "summary": "Assign a role to a user.",
@@ -862,6 +901,32 @@
         "identifier": { "type": "string", "description": "Username or email" },
         "password": { "type": "string", "format": "password" },
         "remember": { "type": "boolean", "default": false }
+      }
+    },
+    "UserUpdateInput": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "description": "The updated username of the user."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The updated email address of the user."
+        },
+        "password": {
+          "type": "string",
+          "format": "password",
+          "description": "The new password for the user."
+        },
+        "role_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "description": "A list of role IDs to assign to the user. This will replace any existing roles. Requires 'user.manage' permission."
+        }
       }
     },
     "UserRoleAssignmentInput": {
