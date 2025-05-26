@@ -15,6 +15,12 @@ import {User} from "@/types/user.ts";
 const UserList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
     const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User>({
+        id: 0,
+        username: '',
+        email: '',
+        roles: [],
+    });
 
     const { data } = useGetData<FetchUsersResponse, BaseQueryParams>(
         ['userList', createQueryParams(queryParams || {})],
@@ -28,8 +34,8 @@ const UserList = () => {
     )
 
     const handleOpenAssignUser = (user: User) => {
-        console.log(user)
         setIsSheetOpen(true);
+        setSelectedUser(user);
     }
 
     return (
@@ -44,8 +50,10 @@ const UserList = () => {
 
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetContent>
-                        <UserAssignForm />
-
+                        <UserAssignForm
+                            userData={selectedUser}
+                            setIsSheetOpen={setIsSheetOpen}
+                        />
                     </SheetContent>
 
                 </Sheet>

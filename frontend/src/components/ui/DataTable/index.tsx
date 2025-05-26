@@ -130,7 +130,7 @@ const DataTable = <TData, TValue>(
                                         </TableCell>
                                     ))}
                                     {rowActions.length > 0 && (
-                                        <TableCell className="flex gap-2">
+                                        <TableCell className="flex gap-2 justify-center">
                                             {rowActions.map((action, index) => (
                                                 <Button
                                                     key={index}
