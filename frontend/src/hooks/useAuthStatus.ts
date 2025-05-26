@@ -1,8 +1,10 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {logout} from "@/features/login/fetch.ts";
+import {User} from "@/types/user.ts";
 
 interface AuthStatusResponse {
   logged_in: boolean;
+  user?: User;
 }
 
 // The fetch function
@@ -39,8 +41,13 @@ export const useAuthStatus = () => {
     },
   });
 
+  const loggedIn = query.data?.logged_in || false;
+  const user = query.data?.user || null;
+
   return {
     ...query,
+    loggedIn,
+    user,
     logout: logoutMutation.mutateAsync,
     isLoggingOut: logoutMutation.isPending,
   };
