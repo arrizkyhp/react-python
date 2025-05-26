@@ -6,9 +6,15 @@ import createQueryParams from "@/utils/createQueryParams.ts";
 import {FetchUsersResponse} from "@/features/users/UserList/UserList.types.ts";
 import {BaseQueryParams} from "@/types/responses.ts";
 import PageHeader from "@/components/ui/PageHeader";
+import { UserCog} from "lucide-react";
+import {Sheet, SheetContent} from "@/components/ui/sheet.tsx";
+import {useState} from "react";
+import UserAssignForm from "@/features/users/UserAssignForm.tsx";
+import {User} from "@/types/user.ts";
 
 const UserList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     const { data } = useGetData<FetchUsersResponse, BaseQueryParams>(
         ['userList', createQueryParams(queryParams || {})],
@@ -21,6 +27,13 @@ const UserList = () => {
         }
     )
 
+
+
+    const handleOpenAssignUser = (user: User) => {
+        console.log(user)
+        setIsSheetOpen(true);
+    }
+
     return (
         <>
             <div className="flex flex-col gap-4">
@@ -30,10 +43,25 @@ const UserList = () => {
                     showBackButton={false}
 
                 />
+
+                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                    <SheetContent>
+                        <UserAssignForm />
+                    </SheetContent>
+                </Sheet>
             </div>
             <DataTable
                 columns={columns}
                 data={data?.items || []}
+                rowActions={[
+                    {
+                        color: "secondary",
+                        icon: <UserCog className="h-4 w-4" />,
+                        onClick: (user) => handleOpenAssignUser(user),
+                        tooltip: "Assign Role",
+                    },
+
+                ]}
                 pagination={{
                     currentPage: data?.pagination.current_page || 1,
                     totalPages: data?.pagination.total_pages || 1,

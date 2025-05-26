@@ -150,6 +150,21 @@ def delete_role(role_id):
 
     return jsonify({"message": "Role deleted successfully!"}), 200
 
+@roles_bp.route("/roles/options", methods=["GET"])
+@login_required
+@permission_required('role.manage') # New granular permission, or 'user.manage'
+def get_role_options():
+    """
+    Returns a simplified list of all roles suitable for frontend multi-select
+    components (e.g., id and name).
+    """
+    roles = Role.query.all()
+    # Format: [{"id": 1, "name": "Admin"}, {"id": 2, "name": "Editor"}, ...]
+    # This directly maps to your 'id' and 'name' preference.
+    roles_options = [{"id": role.id, "name": role.name} for role in roles]
+
+    return jsonify(roles_options), 200
+
 # Optional: Endpoint to manage specific permission assignment for a role (alternative to PATCH)
 @roles_bp.route("/roles/<int:role_id>/permissions", methods=["POST"])
 @login_required

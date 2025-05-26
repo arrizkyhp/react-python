@@ -493,6 +493,31 @@
         }
       }
     },
+    "/app/roles/options": {
+      "get": {
+        "summary": "Get a list of all roles for selection (e.g., multi-select options).",
+        "tags": ["Role Management"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "A list of roles with only ID and name, suitable for selection.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "description": "The role's unique identifier." },
+                  "name": { "type": "string", "description": "The role's name." }
+                },
+                "required": ["id", "name"]
+              }
+            }
+          },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" }
+        }
+      }
+    },
     "/app/roles/{role_id}": {
       "get": {
         "summary": "Get a single role by ID.",
