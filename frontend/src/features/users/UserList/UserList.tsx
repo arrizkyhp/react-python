@@ -5,6 +5,7 @@ import useGetData from "@/hooks/useGetData.ts";
 import createQueryParams from "@/utils/createQueryParams.ts";
 import {FetchUsersResponse} from "@/features/users/UserList/UserList.types.ts";
 import {BaseQueryParams} from "@/types/responses.ts";
+import PageHeader from "@/components/ui/PageHeader";
 
 const UserList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
@@ -21,7 +22,15 @@ const UserList = () => {
     )
 
     return (
-        <div>
+        <>
+            <div className="flex flex-col gap-4">
+                <PageHeader
+                    title="User List"
+                    breadcrumbs={[{ label: "User List" }]}
+                    showBackButton={false}
+
+                />
+            </div>
             <DataTable
                 columns={columns}
                 data={data?.items || []}
@@ -33,7 +42,7 @@ const UserList = () => {
                     onPageSizeChange: onPageSizeChange
                 }}
             />
-        </div>
+        </>
     )
 }
 

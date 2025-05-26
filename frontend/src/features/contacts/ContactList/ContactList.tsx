@@ -2,7 +2,7 @@ import { columns } from "./ContactList.constants";
 import DataTable from "@/components/ui/DataTable";
 import {PencilIcon, TrashIcon} from "lucide-react";
 import useContactList from "@/features/contacts/ContactList/ContactList.hooks.tsx";
-import {Sheet, SheetContent, SheetTrigger} from "@/components/ui/sheet.tsx";
+import { Sheet, SheetContent } from "@/components/ui/sheet.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import ContactForm from "@/features/contacts/ContactForm.tsx";
 import {
@@ -12,6 +12,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle
 } from "@/components/ui/alert-dialog.tsx";
+import PageHeader from "@/components/ui/PageHeader";
 
 const ContactList = () => {
     const {
@@ -40,15 +41,21 @@ const ContactList = () => {
     return (
         <>
             <div className="flex flex-col gap-4">
+                <PageHeader
+                    title="Contact List"
+                    breadcrumbs={[{ label: "Contact List" }]}
+                    showBackButton={false}
+                    actions={
+                        <Button
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={handleOpenCreateSheet}
+                        >
+                            Create Contact
+                        </Button>
+                    }
+                />
+
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                    <div className="flex justify-between items-center gap-2">
-                        <h2 className="font-bold text-lg">Contact List</h2>
-                        <SheetTrigger asChild>
-                            <Button className="bg-green-600 hover:bg-green-700" onClick={handleOpenCreateSheet}>Create Contact</Button>
-                        </SheetTrigger>
-                    </div>
-
-
                     <SheetContent>
                         <ContactForm
                             isEdit={!!editingContactId}
