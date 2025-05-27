@@ -1,3 +1,7 @@
+# Environment files
+frontend/.env
+frontend/.env.production
+
 .idea/
 .venv/
 

@@ -2,9 +2,9 @@ from collections import OrderedDict
 from flask import Blueprint, request, jsonify, make_response
 from flask_login import login_required, current_user
 
-from backend.app.models import User, Role # Adjusted import
-from backend.app import db # Import db from app package __init__
-from backend.app.decorators import permission_required
+from ..models import User, Role # Adjusted import
+from ..config import db # Import db from app package __init__
+from ..decorators import permission_required
 
 users_bp = Blueprint('users', __name__)
 

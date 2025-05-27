@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
 
 const api: AxiosInstance = axios.create({
-    baseURL: 'http://127.0.0.1:5000/api', // Set your base URL here
+    baseURL: import.meta.env.VITE_API_URL, // Set your base URL here
     withCredentials: true, // Automatically include cookies
     headers: {
         'Content-Type': 'application/json',

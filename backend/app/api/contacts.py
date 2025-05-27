@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, make_response
-from backend.app.config import db
-from backend.app.models import Contact
-from backend.app.decorators import permission_required
+from ..config import db
+from ..models import Contact
+from ..decorators import permission_required
 from flask_login import login_required, current_user
 
 contacts_bp = Blueprint('contacts', __name__)

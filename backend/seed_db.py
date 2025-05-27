@@ -4,15 +4,18 @@ import os
 # Add the parent directory to the system path to allow imports like backend.app
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from backend.app import create_app
-from backend.app.config import db
-from backend.app.models.user import User # Import specific models
-from backend.app.models.role import Role
-from backend.app.models.permission import Permission
+from app.config import create_app, db # Import create_app and db directly
+from app.models.user import User # Import specific models
+from app.models.role import Role
+from app.models.permission import Permission
+from app.models.contact import Contact
 
 app = create_app()
 
 with app.app_context():
+    db.create_all()
+    print("Database tables created (if they didn't exist).")
+
     print("Seeding database...")
 
     # --- Create Permissions ---
@@ -26,6 +29,7 @@ with app.app_context():
         ('contact.edit.all', 'Can edit all contacts.', 'Contact Management'),
         ('contact.delete.all', 'Can delete all contacts.', 'Contact Management'),
         ('role.manage', 'Can create, edit, delete roles and assign permissions to them.', 'Role Management'),
+        ('role.assign_permission', 'Can assign/unassign permissions to/from roles.', 'Role Management'),
         ('permission.manage', 'Can create, edit, delete individual permissions.', 'Permission Management')
     ]
 

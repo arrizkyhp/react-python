@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify, make_response
 from werkzeug.security import check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
-from backend.app.models import User, Role # Adjusted import
-from backend.app import db # Import db from app package __init__
+from ..models import User, Role # Adjusted import
+from ..config import db # Import db from app package __init__
 
 auth_bp = Blueprint('auth', __name__)
 
