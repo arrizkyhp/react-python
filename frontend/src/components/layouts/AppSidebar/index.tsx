@@ -12,9 +12,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton,
-  SidebarMenuSubItem,
+  SidebarMenuSubItem, useSidebar,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import {Link, useLocation} from "react-router-dom";
 import { menu } from "@/constants/menu.tsx";
 import {
   DropdownMenu,
@@ -28,10 +28,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {SubMenuItem} from "@/types/menu.ts";
 
 const AppSidebar = () => {
   const { logout, isLoggingOut, user } = useAuthStatus();
   const { username, email } = user || {};
+  const location = useLocation();
+  const { state } = useSidebar()
+  const isCollapsed = state === "collapsed"
 
   const handleLogout = async () => {
     try {
@@ -40,6 +44,14 @@ const AppSidebar = () => {
       console.error("Logout failed:", error);
     }
   };
+
+  const isGroupActive = (submenu: SubMenuItem[]) => {
+    return submenu.some((subItem) => location.pathname === subItem.url);
+  };
+
+  console.log(isGroupActive)
+
+  const activeClasses = "bg-sidebar-accent text-sidebar-accent-foreground";
 
   return (
       <Sidebar collapsible="icon">
@@ -58,11 +70,17 @@ const AppSidebar = () => {
                         <Collapsible
                             key={item.title}
                             className="group/collapsible"
+                            defaultOpen={isGroupActive(item.submenu)}
                             asChild
                         >
                           <SidebarMenuItem>
                               <CollapsibleTrigger asChild>
-                                <SidebarMenuButton tooltip={item.title}>
+                                <SidebarMenuButton
+                                    tooltip={item.title}
+                                    className={
+                                      isGroupActive(item.submenu) ? activeClasses : ""
+                                    }
+                                >
                                   {item.icon && <item.icon />}
                                   <span>{item.title}</span>
                                   {item.submenu && item.submenu.length > 0 && (
@@ -74,8 +92,13 @@ const AppSidebar = () => {
                               <SidebarMenuSub>
                                 {item.submenu.map((subItem) => (
                                   <SidebarMenuSubItem key={subItem.title}>
-                                    <SidebarMenuSubButton asChild>
-                                      <Link to={subItem.url}>
+                                    <SidebarMenuSubButton
+                                        asChild
+                                    >
+                                      <Link
+                                          to={subItem.url}
+                                          className={location.pathname === subItem.url ? activeClasses : ""}
+                                      >
                                         {subItem.icon && <subItem.icon />}
                                         <span>{subItem.title}</span>
                                       </Link>
@@ -90,7 +113,10 @@ const AppSidebar = () => {
                         item.url && ( // Only render Link if url exists
                             <SidebarMenuItem key={item.title}>
                               <SidebarMenuButton asChild tooltip={item.title}>
-                                <Link to={item.url}>
+                                <Link
+                                    to={item.url}
+                                    className={location.pathname === item.url ? activeClasses : ""}
+                                >
                                   {item.icon && <item.icon />}
                                   <span>{item.title}</span>
                                 </Link>

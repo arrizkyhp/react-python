@@ -1,6 +1,7 @@
 import {Calendar, Contact, Home, Inbox, KeyRound, Search, Settings, ShieldUser, UserRound, Users} from "lucide-react";
+import {MenuItem} from "@/types/menu.ts";
 
-export const menu = [
+export const menu: MenuItem[] = [
     {
         title: "Home",
         url: "/",
@@ -27,16 +28,6 @@ export const menu = [
                 icon: KeyRound, // A key or lock icon would be suitable
             },
         ],
-    },
-    {
-        title: "User",
-        url: "/user",
-        icon: UserRound,
-    },
-    {
-        title: "Role",
-        url: "/role",
-        icon: ShieldUser,
     },
     {
         title: "Contact",
