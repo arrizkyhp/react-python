@@ -3,11 +3,13 @@ import useGetData from "@/hooks/useGetData.ts";
 import {FetchContactsResponse} from "@/features/contacts/ContactList/ContactList.types.ts";
 import {BaseQueryParams} from "@/types/responses.ts";
 import createQueryParams from "@/utils/createQueryParams.ts";
-import {FormEvent, useState} from "react";
+import {FormEvent, useMemo, useState} from "react";
 import {useDeleteData, usePatchData, usePostData} from "@/hooks/useMutateData.ts";
 import type {Contact} from "@/types/contact.ts";
 import {toast} from "sonner";
 import {Check} from "lucide-react";
+import {Button} from "@/components/ui/button.tsx";
+import {usePageHeader} from "@/contexts/PageHeaderContext.tsx";
 
 const useContactList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
@@ -156,6 +158,21 @@ const useContactList = () => {
         }
     }
 
+    const userHeaderConfig = useMemo(() => ({
+        title: "Contact List",
+        breadcrumbs: [{ label: "Contact List" }],
+        showBackButton: false,
+        actions: (
+            <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={handleOpenCreateSheet}
+            >
+                Create Contact
+            </Button>
+        )
+    }), []);
+
+    usePageHeader(userHeaderConfig);
 
     return {
         contactToDeleteName,

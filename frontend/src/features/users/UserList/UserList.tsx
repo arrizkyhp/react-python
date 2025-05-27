@@ -5,12 +5,12 @@ import useGetData from "@/hooks/useGetData.ts";
 import createQueryParams from "@/utils/createQueryParams.ts";
 import {FetchUsersResponse} from "@/features/users/UserList/UserList.types.ts";
 import {BaseQueryParams} from "@/types/responses.ts";
-import PageHeader from "@/components/ui/PageHeader";
 import { UserCog} from "lucide-react";
 import {Sheet, SheetContent} from "@/components/ui/sheet.tsx";
-import {useState} from "react";
+import {useMemo, useState} from "react";
 import UserAssignForm from "@/features/users/UserAssignForm.tsx";
 import {User} from "@/types/user.ts";
+import { usePageHeader } from "@/contexts/PageHeaderContext";
 
 const UserList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
@@ -21,6 +21,14 @@ const UserList = () => {
         email: '',
         roles: [],
     });
+
+    const userHeaderConfig = useMemo(() => ({
+        title: "User List",
+        breadcrumbs: [{ label: "User List" }],
+        showBackButton: false,
+    }), []);
+
+    usePageHeader(userHeaderConfig);
 
     const { data } = useGetData<FetchUsersResponse, BaseQueryParams>(
         ['userList', createQueryParams(queryParams || {})],
@@ -41,13 +49,6 @@ const UserList = () => {
     return (
         <>
             <div className="flex flex-col gap-4">
-                <PageHeader
-                    title="User List"
-                    breadcrumbs={[{ label: "User List" }]}
-                    showBackButton={false}
-
-                />
-
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetContent>
                         <UserAssignForm

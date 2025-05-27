@@ -17,9 +17,10 @@ import {
     AlertDialogTitle
 } from "@/components/ui/alert-dialog.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {useState} from "react";
+import {useMemo, useState} from "react";
 import {useDeleteData} from "@/hooks/useMutateData.ts";
 import {toast} from "sonner";
+import {usePageHeader} from "@/contexts/PageHeaderContext.tsx";
 
 const RoleList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
@@ -39,6 +40,26 @@ const RoleList = () => {
             },
         }
     )
+
+    const handleCreateRole = () => {
+        navigate("/role/create");
+    }
+
+    const userHeaderConfig = useMemo(() => ({
+        title: "Role List",
+        breadcrumbs: [{ label: "Role List" }],
+        showBackButton: false,
+        actions: (
+            <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={handleCreateRole}
+            >
+                Create Role
+            </Button>
+        )
+    }), []);
+
+    usePageHeader(userHeaderConfig);
 
     const {
         mutate: deleteRoleMutation,

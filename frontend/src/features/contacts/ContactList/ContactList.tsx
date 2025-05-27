@@ -12,7 +12,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle
 } from "@/components/ui/alert-dialog.tsx";
-import PageHeader from "@/components/ui/PageHeader";
 
 const ContactList = () => {
     const {
@@ -25,7 +24,6 @@ const ContactList = () => {
         handleDeleteContactConfirm,
         handleDeleteContact,
         handleSubmit,
-        handleOpenCreateSheet,
         handleOpenEditSheet,
         isSheetOpen,
         isAlertDialogOpen,
@@ -41,20 +39,6 @@ const ContactList = () => {
     return (
         <>
             <div className="flex flex-col gap-4">
-                <PageHeader
-                    title="Contact List"
-                    breadcrumbs={[{ label: "Contact List" }]}
-                    showBackButton={false}
-                    actions={
-                        <Button
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={handleOpenCreateSheet}
-                        >
-                            Create Contact
-                        </Button>
-                    }
-                />
-
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetContent>
                         <ContactForm

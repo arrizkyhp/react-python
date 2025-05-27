@@ -11,10 +11,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {usePatchData} from "@/hooks/useMutateData.ts";
 import {toast} from "sonner";
-import {useEffect, useState, useCallback} from "react"; // Add useCallback
+import {useEffect, useState, useCallback, useMemo} from "react"; // Add useCallback
 import {Input} from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea";
-import PageHeader from "@/components/ui/PageHeader";
+import {usePageHeader} from "@/contexts/PageHeaderContext.tsx";
 
 const groupPermissionsByCategory = (
     permissions: Permission[],
@@ -139,6 +139,8 @@ const RoleDetailPage = () => {
         },
     );
 
+
+
     const handleBack = () => {
         if (isEditing) {
             if (window.confirm("You have unsaved changes. Are you sure you want to go back?")) {
@@ -163,14 +165,14 @@ const RoleDetailPage = () => {
         }
     }
 
-    const handleSaveClick = () => {
+    const handleSaveClick = useCallback(() => {
         const payload = {
             name: roleName,
             description: roleDescription,
             permission_ids: selectedPermissionIds,
         };
         updateRoleMutation(payload);
-    }
+    }, [roleName, roleDescription, selectedPermissionIds, updateRoleMutation])
 
     const togglePermission = (permissionId: number) => {
         setSelectedPermissionIds(prev =>
@@ -179,6 +181,42 @@ const RoleDetailPage = () => {
                 : [...prev, permissionId]
         );
     };
+
+    const userHeaderConfig = useMemo(() => ({
+        title: isEditing ? "Edit Role" : "Role Detail",
+        breadcrumbs: [{ label: "Role", href: "/role" },
+            { label: isEditing ? "Edit" : "Detail" },],
+        onBack: handleBack,
+        actions: (
+            isEditing ? (
+                <>
+                    <Button
+                        variant="outline"
+                        onClick={handleCancelClick}
+                        disabled={isUpdating}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={handleSaveClick}
+                        disabled={isUpdating}
+                    >
+                        {isUpdating && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Save Changes
+                    </Button>
+                </>
+            ) : (
+                <Button className="bg-green-600 hover:bg-green-700" onClick={handleEditClick}>
+                    Edit Role
+                </Button>
+            )
+        )
+    }), [handleSaveClick, isEditing]);
+
+    usePageHeader(userHeaderConfig);
 
     const allGroupedPermissions = permissionsData?.items ? groupPermissionsByCategory(permissionsData.items) : {};
 
@@ -222,42 +260,6 @@ const RoleDetailPage = () => {
 
     return (
         <div className="flex flex-col mt-2 w-full">
-            <PageHeader
-                title={isEditing ? "Edit Role" : "Role Detail"}
-                breadcrumbs={[
-                    { label: "Role", href: "/role" },
-                    { label: isEditing ? "Edit" : "Detail" },
-                ]}
-                onBack={handleBack}
-                actions={
-                    isEditing ? (
-                        <>
-                            <Button
-                                variant="outline"
-                                onClick={handleCancelClick}
-                                disabled={isUpdating}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                className="bg-green-600 hover:bg-green-700"
-                                onClick={handleSaveClick}
-                                disabled={isUpdating}
-                            >
-                                {isUpdating && (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                )}
-                                Save Changes
-                            </Button>
-                        </>
-                    ) : (
-                        <Button className="bg-green-600 hover:bg-green-700" onClick={handleEditClick}>
-                            Edit Role
-                        </Button>
-                    )
-                }
-            />
-
             <Card className="mt-6">
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

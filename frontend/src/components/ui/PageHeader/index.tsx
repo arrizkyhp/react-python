@@ -1,24 +1,9 @@
-import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import React from "react";
-
-interface BreadcrumbItem {
-    label: string;
-    href?: string; // Optional href for links, if not provided it's considered the current page
-}
 
 interface PageHeaderProps {
     title: string;
-    breadcrumbs: BreadcrumbItem[];
     showBackButton?: boolean;
     onBack?: () => void;
     actions?: React.ReactNode; // For buttons, etc.
@@ -26,7 +11,6 @@ interface PageHeaderProps {
 
 const PageHeader = (props: PageHeaderProps) => {
     const { title,
-        breadcrumbs,
         showBackButton = true,
         onBack,
         actions,
@@ -41,24 +25,6 @@ const PageHeader = (props: PageHeaderProps) => {
                     </Button>
                 )}
                 <div className="flex flex-col gap-1">
-                    <Breadcrumb>
-                        <BreadcrumbList>
-                            {breadcrumbs.map((item, index) => (
-                                <React.Fragment key={item.label}>
-                                    <BreadcrumbItem>
-                                        {item.href ? (
-                                            <BreadcrumbLink>
-                                                <Link to={item.href}>{item.label}</Link>
-                                            </BreadcrumbLink>
-                                        ) : (
-                                            <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                                        )}
-                                    </BreadcrumbItem>
-                                    {index < breadcrumbs.length - 1 && <BreadcrumbSeparator />}
-                                </React.Fragment>
-                            ))}
-                        </BreadcrumbList>
-                    </Breadcrumb>
                     <h2 className="font-bold text-xl">{title}</h2>
                 </div>
             </div>

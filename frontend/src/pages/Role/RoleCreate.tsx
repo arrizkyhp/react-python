@@ -9,12 +9,12 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { useState } from "react";
+import {useCallback, useMemo, useState} from "react";
 import { Input } from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea";
 import useGetData from "@/hooks/useGetData.ts";
 import { usePostData } from "@/hooks/useMutateData.ts"; // Assuming this is where usePostData is
-import PageHeader from "@/components/ui/PageHeader";
+import {usePageHeader} from "@/contexts/PageHeaderContext.tsx";
 
 const groupPermissionsByCategory = (
     permissions: Permission[],
@@ -110,16 +110,14 @@ const RoleCreatePage = () => {
         }
     };
 
-    const handleCreateClick = () => {
-        // Prepare the payload for the post request
+    const handleCreateClick = useCallback(() => {
         const payload = {
             name: roleName,
             description: roleDescription,
-            permission_ids: selectedPermissionIds, // Send only IDs
+            permission_ids: selectedPermissionIds,
         };
-
         createRoleMutation(payload);
-    };
+    }, [roleName, roleDescription, selectedPermissionIds, createRoleMutation]);
 
     const togglePermission = (permissionId: number) => {
         setSelectedPermissionIds((prev) =>
@@ -132,6 +130,32 @@ const RoleCreatePage = () => {
     const allGroupedPermissions = permissionsData?.items
         ? groupPermissionsByCategory(permissionsData.items)
         : {};
+
+    const userHeaderConfig = useMemo(() => ({
+        title: "Create New Role",
+        breadcrumbs: [
+            { label: "Role", href: "/role" },
+            { label: "Create" },
+        ],
+        onBack: handleBack,
+        actions: (
+            <>
+                <Button variant="outline" onClick={handleBack} disabled={isCreating}>
+                    Cancel
+                </Button>
+                <Button
+                    className="bg-green-600 hover:bg-green-700"
+                    onClick={handleCreateClick}
+                    disabled={isCreating}
+                >
+                    {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create Role
+                </Button>
+            </>
+        )
+    }), [handleCreateClick, isCreating]);
+
+    usePageHeader(userHeaderConfig);
 
     if (isLoadingAllPermissions) {
         return (
@@ -158,30 +182,6 @@ const RoleCreatePage = () => {
 
     return (
         <div className="flex flex-col mt-2 w-full">
-            <PageHeader
-                title="Create New Role"
-                breadcrumbs={[
-                    { label: "Role", href: "/role" },
-                    { label: "Create" },
-                ]}
-                onBack={handleBack}
-                actions={
-                    <>
-                        <Button variant="outline" onClick={handleBack} disabled={isCreating}>
-                            Cancel
-                        </Button>
-                        <Button
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={handleCreateClick}
-                            disabled={isCreating}
-                        >
-                            {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Create Role
-                        </Button>
-                    </>
-                }
-            />
-
             <Card className="mt-6">
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-6">

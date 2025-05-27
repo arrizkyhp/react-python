@@ -12,55 +12,67 @@ import {RedirectIfAuthenticated} from "@/components/layouts/ProtectedRoute";
 import RolePage from "@/pages/Role/RolePage.tsx";
 import RoleDetailPage from "@/pages/Role/RoleDetail.tsx";
 import RoleCreatePage from "@/pages/Role/RoleCreate.tsx";
+import MainContentLayout from '@/components/layouts/MainContentLayout';
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
     {
+        // This is your authenticated route branch.
+        // LayoutWithSidebar provides ProtectedRoute and SidebarProvider.
+        // It renders <App />, which then renders its own <Outlet /> for MainContentLayout.
         element: <LayoutWithSidebar />,
         // errorElement: <ErrorPage />, // Optional error page
         children: [
             {
-                index: true,
-                element: <ContactPage />,
-            },
-            {
-                path: "User", // The URL path for the about page
-                element: <UserPage />,
-            },
-            {
-                path: "Role", // The URL path for the about page
+                // This wraps all routes that will use the MainContentLayout
+                // and thus the PageHeaderContext.
+                element: <MainContentLayout />,
                 children: [
+                    // --- Authenticated App Routes (with dynamic PageHeader) ---
                     {
-                        index: true,
-                        element: <RolePage />,
+                        index: true, // This makes ContactPage the default route within the authenticated section
+                        element: <ContactPage />,
                     },
                     {
-                        path: "create",
-                        element: <RoleCreatePage />,
+                        path: "User",
+                        element: <UserPage />,
                     },
                     {
-                        path: ":id",
-                        element: <RoleDetailPage />,
+                        path: "Role",
+                        children: [
+                            {
+                                index: true,
+                                element: <RolePage />,
+                            },
+                            {
+                                path: "create",
+                                element: <RoleCreatePage />,
+                            },
+                            {
+                                path: ":id",
+                                element: <RoleDetailPage />,
+                            },
+                            {
+                                path: ":id/edit", // You might use this or handle edit state within :id
+                                element: <RoleDetailPage />,
+                            },
+                        ],
                     },
                     {
-                        path: ":id/edit",
-                        element: <RoleDetailPage />,
+                        path: "Contact", // Explicit Contact route
+                        element: <ContactPage />,
                     },
-                ]
+                ],
             },
-            {
-                path: "Contact", // The URL path for the about page
-                element: <ContactPage />,
-            },
-            // Add more routes here for other pages
-        ]
+        ],
     },
+    // --- Public Routes (no sidebar, no PageHeaderContext) ---
     {
-        path: '/',
+        path: '/', // This handles your public routes (like login)
         element: <RedirectIfAuthenticated />,
         children: [
             {
-                path: '/login',
+                path: 'login',
                 element: <LoginPage />,
             },
             // Add more public routes here that should redirect if logged in
