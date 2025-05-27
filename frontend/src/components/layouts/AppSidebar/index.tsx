@@ -1,4 +1,4 @@
-import {ChevronsUpDown, LogOut} from "lucide-react";
+import {ChevronRight, ChevronsUpDown, LogOut} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStatus } from "@/hooks/useAuthStatus";
 
@@ -11,16 +11,27 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem,
+  SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { Link } from "react-router-dom";
 import { menu } from "@/constants/menu.tsx";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import generateAbbreviation from "@/utils/generateAbbreviation.ts";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const AppSidebar = () => {
   const { logout, isLoggingOut, user } = useAuthStatus();
-  const { username, email } = user || {}
+  const { username, email } = user || {};
 
   const handleLogout = async () => {
     try {
@@ -42,16 +53,52 @@ const AppSidebar = () => {
             <SidebarGroupLabel>Application</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {menu.map((item) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <Link to={item.url}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                ))}
+                {menu.map((item) =>
+                    item.isGroup && item.submenu ? (
+                        <Collapsible
+                            key={item.title}
+                            className="group/collapsible"
+                            asChild
+                        >
+                          <SidebarMenuItem>
+                              <CollapsibleTrigger asChild>
+                                <SidebarMenuButton tooltip={item.title}>
+                                  {item.icon && <item.icon />}
+                                  <span>{item.title}</span>
+                                  {item.submenu && item.submenu.length > 0 && (
+                                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                  )}
+                                </SidebarMenuButton>
+                              </CollapsibleTrigger>
+                            <CollapsibleContent>
+                              <SidebarMenuSub>
+                                {item.submenu.map((subItem) => (
+                                  <SidebarMenuSubItem key={subItem.title}>
+                                    <SidebarMenuSubButton asChild>
+                                      <Link to={subItem.url}>
+                                        {subItem.icon && <subItem.icon />}
+                                        <span>{subItem.title}</span>
+                                      </Link>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                ))}
+                              </SidebarMenuSub>
+                            </CollapsibleContent>
+                          </SidebarMenuItem>
+                        </Collapsible>
+                    ) : (
+                        item.url && ( // Only render Link if url exists
+                            <SidebarMenuItem key={item.title}>
+                              <SidebarMenuButton asChild tooltip={item.title}>
+                                <Link to={item.url}>
+                                  {item.icon && <item.icon />}
+                                  <span>{item.title}</span>
+                                </Link>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        )
+                    ),
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -87,7 +134,9 @@ const AppSidebar = () => {
                       className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
                     <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 text-white">
-                      <span className="text-sm font-semibold">{generateAbbreviation(user?.username || '')}</span>
+                    <span className="text-sm font-semibold">
+                      {generateAbbreviation(user?.username || "")}
+                    </span>
                     </div>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">{username}</span>
