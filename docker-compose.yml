@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    # Mount the backend code for live reloading during development
+    volumes:
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+    environment:
+      # Example: Database connection string, adjust as needed
+      DATABASE_URL: postgresql://user:password@db:5432/mydatabase
+    # Depends on the database service if you add one
+    # depends_on:
+    #   - db
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    # Mount the frontend code for live reloading during development
+    # Note: For Vite, this might need specific configuration in vite.config.ts
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Avoid overwriting node_modules from the container
+    ports:
+      - "80:80" # Map container's port 80 to host's port 80
+    environment:
+      # Example: Point React app to Flask backend
+      # This needs to be available at build time for React (Vite) if used in public/index.html or similar
+      VITE_FLASK_API_URL: http://localhost:5000 # For development on the host
+      # Or within the Docker network for inter-service communication
+      # VITE_FLASK_API_URL: http://backend:5000
+    networks:
+      - app-network
+    depends_on:
+      - backend # Frontend depends on backend being up (though not strictly necessary for Nginx serving static files)
+
+networks:
+  app-network:
+    driver: bridge
