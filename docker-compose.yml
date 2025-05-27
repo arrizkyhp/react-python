@@ -13,6 +13,9 @@ services:
     environment:
       # Example: Database connection string, adjust as needed
       DATABASE_URL: postgresql://user:password@db:5432/mydatabase
+      FLASK_APP: main.py
+      FLASK_RUN_HOST: 0.0.0.0
+      FLASK_DEBUG: 1
     # Depends on the database service if you add one
     # depends_on:
     #   - db
