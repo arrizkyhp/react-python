@@ -30,22 +30,29 @@ with app.app_context():
         ('contact.delete.all', 'Can delete all contacts.', 'Contact Management'),
         ('role.manage', 'Can create, edit, delete roles and assign permissions to them.', 'Role Management'),
         ('role.assign_permission', 'Can assign/unassign permissions to/from roles.', 'Role Management'),
-        ('permission.manage', 'Can create, edit, delete individual permissions.', 'Permission Management')
+        ('permission.manage', 'Can create, edit, delete individual permissions.', 'Permission Management'),
+        ('permission.read.all', 'Can read all permissions.', 'Permission Management', 'active'),
+        ('permission.create', 'Can create new permissions.', 'Permission Management', 'active'),
+        ('permission.update', 'Can update existing permissions.', 'Permission Management', 'active'),
+        ('permission.delete', 'Can delete permissions.', 'Permission Management', 'active'),
     ]
 
-    for name, desc, category in permissions_to_create:  # <-- Unpack the new 'category'
+    for name, desc, category, status in permissions_to_create:  # <-- Unpack the new 'status'
         perm = Permission.query.filter_by(name=name).first()
         if not perm:
-            # Pass category to the Permission constructor
-            perm = Permission(name=name, description=desc, category=category)  # <-- Pass 'category' here
+            # Pass category and status to the Permission constructor
+            perm = Permission(name=name, description=desc, category=category, status=status)
             db.session.add(perm)
-            print(f"Created permission: {name} (Category: {category})")
+            print(f"Created permission: {name} (Category: {category}, Status: {status})")
         else:
-            if perm.description != desc or perm.category != category:
+            # Check if description, category, or status needs updating
+            if perm.description != desc or perm.category != category or perm.status != status:
                 perm.description = desc
                 perm.category = category
-                db.session.add(perm)  # Re-add to session to mark as dirty
-                print(f"Updated permission: {name} (Category: {category})")
+                perm.status = status  # Update status
+                db.session.add(
+                    perm)  # Re-add to session to mark as dirty (though usually not needed if object is already in session)
+                print(f"Updated permission: {name} (Category: {category}, Status: {status})")
     db.session.commit()
 
     # Get all permissions for assignment
@@ -70,23 +77,31 @@ with app.app_context():
     # --- Assign Permissions to Roles ---
     # Admin gets all permissions
     if role_admin:
-        for perm_name, _, _ in permissions_to_create:  # Unpack to get just the name for existing check
-            if all_permissions[perm_name] not in role_admin.permissions:
-                role_admin.permissions.append(all_permissions[perm_name])
+        # It's better to iterate over the dictionary `all_permissions` directly
+        # or use `permissions_to_create` to ensure all intended permissions are checked.
+        # Here, we'll iterate through all available permissions by name.
+        for perm_name, perm_obj in all_permissions.items():
+            # You might want to assign ALL permissions to Admin, regardless of their default status,
+            # or only assign 'active' ones. For Admin, typically assign all.
+            if perm_obj not in role_admin.permissions:
+                role_admin.permissions.append(perm_obj)
                 print(f"Assigned {perm_name} to Admin role")
 
     # User gets only their own contact permissions and create
     if role_user:
-        user_perms = [
+        user_perms_names = [
             'contact.create',
             'contact.read.own',
             'contact.edit.own',
             'contact.delete.own'
         ]
-        for perm_name in user_perms:
-            if all_permissions.get(perm_name) and all_permissions[perm_name] not in role_user.permissions:
-                role_user.permissions.append(all_permissions[perm_name])
-                print(f"Assigned {perm_name} to User role")
+        # Iterate over the specific names we want to assign
+        for perm_name in user_perms_names:
+            perm_obj = all_permissions.get(perm_name)
+            if perm_obj:  # Ensure the permission exists in our all_permissions dict
+                if perm_obj not in role_user.permissions:
+                    role_user.permissions.append(perm_obj)
+                    print(f"Assigned {perm_name} to User role")
 
     db.session.commit()
 
@@ -94,20 +109,32 @@ with app.app_context():
     admin_user = User.query.filter_by(username='admin').first()
     if not admin_user:
         admin_user = User(username='admin', email='admin@example.com')
-        admin_user.set_password('adminpassword') # CHANGE THIS FOR PRODUCTION!
+        admin_user.set_password('adminpassword')  # CHANGE THIS FOR PRODUCTION!
         db.session.add(admin_user)
-        if role_admin and role_admin not in admin_user.roles:
+        # Clear existing roles and assign Admin role for idempotency
+        if admin_user.roles.count() > 0:
+            admin_user.roles.clear()
+        if role_admin:
             admin_user.roles.append(role_admin)
         print("Created admin user.")
+    elif role_admin not in admin_user.roles:  # If admin exists but doesn't have role
+        admin_user.roles.append(role_admin)
+        print("Ensured admin user has Admin role.")
 
     regular_user = User.query.filter_by(username='user').first()
     if not regular_user:
         regular_user = User(username='user', email='user@example.com')
-        regular_user.set_password('userpassword') # CHANGE THIS FOR PRODUCTION!
+        regular_user.set_password('userpassword')  # CHANGE THIS FOR PRODUCTION!
         db.session.add(regular_user)
-        if role_user and role_user not in regular_user.roles:
+        # Clear existing roles and assign User role for idempotency
+        if regular_user.roles.count() > 0:
+            regular_user.roles.clear()
+        if role_user:
             regular_user.roles.append(role_user)
         print("Created regular user.")
+    elif role_user not in regular_user.roles:  # If user exists but doesn't have role
+        regular_user.roles.append(role_user)
+        print("Ensured regular user has User role.")
 
     db.session.commit()
     print("Database seeding complete!")
