@@ -37,7 +37,7 @@ export const columns: ColumnDef<Permission>[] = [
             const isActive = status === "active";
 
             return (
-                <Badge variant={isActive ? "default" : "destructive"}>
+                <Badge variant={isActive ? "default" : "destructive"} className="capitalize">
                     {status as string}
                 </Badge>
             );

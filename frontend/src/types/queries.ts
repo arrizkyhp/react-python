@@ -1,13 +1,16 @@
-import {UseMutationOptions} from "@tanstack/react-query";
+import {UseMutationOptions, UseQueryOptions} from "@tanstack/react-query";
 import {BaseError} from "@/types/responses.ts";
 import {AxiosRequestHeaders} from "axios";
 
 export type FetchQueryExtras<T, TParam> = {
-    options?: {
+    options?: Omit<
+        UseQueryOptions<T, BaseError, T, any[]>,
+        "queryKey" | "queryFn"
+    > & {
         enabled?: boolean;
         initialData?: T;
         retry?: number | boolean;
-        // Add other react-query options you might need
+        // You can add more specific overrides here if needed
     };
     params?: TParam;
     normalizer?: (data: any) => T; // Optional function to transform data

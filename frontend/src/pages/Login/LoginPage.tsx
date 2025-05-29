@@ -13,10 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {login} from "@/features/login/fetch.ts";
 import {toast} from "sonner";
 import {useNavigate} from "react-router-dom";
+import { usePostData } from "@/hooks/useMutateData";
+import {ENDPOINTS} from "@/constants/apiUrl.ts";
 
 // Updated Zod schema
 const loginSchema = z.object({
@@ -31,7 +31,11 @@ const loginSchema = z.object({
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
+    const {
+        AUTHENTICATION: {
+            LOGIN
+        }
+    } = ENDPOINTS;
 
     const loginForm = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
@@ -42,26 +46,31 @@ const LoginPage = () => {
         },
     });
 
-    const loginMutation = useMutation({
-        mutationFn: login,
-        onSuccess: () => {
-            toast('Login successfully!', {
-                position: "top-center",
-            })
+// Use your custom usePostData hook
+    const { mutate: loginMutate } = usePostData(
+        ["login"], // A unique key for this mutation
+        LOGIN, // The login API endpoint
+        {
+            options:  {
+                onSuccess: () => {
+                    toast("Login successfully!", {
+                        position: "top-center",
+                    });
+                    navigate("/");
+                },
+                onError: (error) => {
+                    const errorMessage =
+                        error?.message ||
+                        "Login failed! Please check your credentials.";
 
-            queryClient.invalidateQueries({ queryKey: ['authStatus'] });
-            navigate("/");
+                    toast(errorMessage, {
+                        position: "top-center",
+                    });
+                },
+            },
         },
-        onError: error => {
-            const errorMessage =
-                error?.message || // Standard error message
-                "Login failed! Please check your credentials.";
-
-            toast(errorMessage, {
-                position: "top-center",
-            })
-        }
-    });
+        ['authStatus']
+    );
 
     function onSubmit(values: z.infer<typeof loginSchema>) {
         // Transform the form values to the desired output format
@@ -71,7 +80,7 @@ const LoginPage = () => {
             remember: values.remember || false,
         };
 
-        loginMutation.mutate(submissionData)
+        loginMutate(submissionData)
         console.log("Formatted Submission Data:", submissionData);
     }
 

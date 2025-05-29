@@ -1,54 +1,60 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
-import {logout} from "@/features/login/fetch.ts";
 import {User} from "@/types/user.ts";
+import useGetData from "./useGetData";
+import {ENDPOINTS} from "@/constants/apiUrl.ts";
+import {usePostData} from "@/hooks/useMutateData.ts";
 
 interface AuthStatusResponse {
   logged_in: boolean;
   user?: User;
 }
 
-// The fetch function
-export const checkAuthStatus = async (): Promise<AuthStatusResponse> => {
-  const response = await fetch("http://127.0.0.1:5000/api/auth/status", {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    const data = await response.json();
-    throw new Error(data.message || "Failed to check authentication status");
-  }
-
-  return response.json();
-};
-
-// React Query hooks
 export const useAuthStatus = () => {
-  const query = useQuery({
-    queryKey: ["authStatus"],
-    queryFn: checkAuthStatus,
-    // Refresh every 5 minutes and when the window regains focus
-    refetchInterval: 5 * 60 * 1000,
-    refetchOnWindowFocus: true,
-  });
+  const {
+    AUTHENTICATION: {
+      STATUS
+    }
+  } = ENDPOINTS;
 
-  const logoutMutation = useMutation({
-    mutationFn: logout,
-    onSuccess: () => {
-      // Invalidate auth status query after successful logout
-      query.refetch();
-    },
-  });
+  const {
+    data: authStatusData,
+    refetch,
+    isLoading
+  } = useGetData<AuthStatusResponse>(
+      ["authStatus"],
+      STATUS,
+      {
+        options: {
+          refetchInterval: 5 * 60 * 1000, // Refresh every 5 minutes
+          refetchOnWindowFocus: true, // When the window regains focus
+        },
+      },
+  );
 
-  const loggedIn = query.data?.logged_in || false;
-  const user = query.data?.user || null;
+  const {
+    mutateAsync: logout,
+    isLoading: isLoggingOut,
+  } = usePostData(
+      // Use `any` for response if not strictly typed, or create LogoutResponse
+      ["logout"], // Key for the logout mutation
+      "http://127.0.0.1:5000/api/auth/logout", // Logout endpoint
+      {
+        options: {
+          onSuccess: () => {
+            refetch();
+          },
+        },
+      }
+  );
+
+  const loggedIn = authStatusData?.logged_in || false;
+  const user = authStatusData?.user || null;
 
   return {
-    ...query,
+    data: authStatusData,
     loggedIn,
     user,
-    logout: logoutMutation.mutateAsync,
-    isLoggingOut: logoutMutation.isPending,
+    isLoading,
+    logout,
+    isLoggingOut,
   };
 };

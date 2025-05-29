@@ -1,4 +1,8 @@
 export const ENDPOINTS = {
+    AUTHENTICATION: {
+        STATUS: '/auth/status',
+        LOGIN: '/auth/login',
+    },
     USERS: {
         GET: '/app/users',
     },
