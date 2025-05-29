@@ -6,11 +6,11 @@ import {Badge} from "@/components/ui/badge.tsx";
 import { Link } from "react-router-dom";
 
 
-interface PermissionFormProps {
+interface PermissionDetailProps {
     data: Permission
 }
 
-const PermissionForm = (props: PermissionFormProps) => {
+const PermissionDetail = (props: PermissionDetailProps) => {
     const {
         data
     } = props
@@ -85,4 +85,4 @@ const PermissionForm = (props: PermissionFormProps) => {
     )
 }
 
-export default PermissionForm;
+export default PermissionDetail;

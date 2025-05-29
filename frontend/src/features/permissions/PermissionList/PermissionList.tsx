@@ -11,7 +11,7 @@ import { columns } from "./PermissionList.constants";
 import {EyeIcon} from "lucide-react";
 import {Permission} from "@/types/permission.ts";
 import {Sheet, SheetContent} from "@/components/ui/sheet.tsx";
-import PermissionForm from "@/features/permissions/PermissionForm";
+import PermissionDetail from "@/features/permissions/PermissionDetail";
 
 const PermissionList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
@@ -57,21 +57,13 @@ const PermissionList = () => {
     return (
         <>
             <div className="flex flex-col gap-4">
+                <p className="font-fira-code">Whereas disregard and contempt for human rights have resulted</p>
                 <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                     <SheetContent>
-                        <PermissionForm
+                        <PermissionDetail
                             data={selectedPermissions}
                         />
-                        {/*<ContactForm*/}
-                        {/*    isEdit={!!editingContactId}*/}
-                        {/*    handleSubmit={handleSubmit}*/}
-                        {/*    firstName={firstName}*/}
-                        {/*    lastName={lastName}*/}
-                        {/*    email={email}*/}
-                        {/*    setFirstName={setFirstName}*/}
-                        {/*    setLastName={setLastName}*/}
-                        {/*    setEmail={setEmail}*/}
-                        {/*/>*/}
+
                     </SheetContent>
                 </Sheet>
             </div>

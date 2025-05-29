@@ -7,6 +7,12 @@ export const columns: ColumnDef<Permission>[] = [
     {
         accessorKey: "name",
         header: "Name",
+        cell: ({ row }) => {
+            const name = row.getValue("name");
+            return (
+                <p className="font-fira-code">{name as string}</p>
+            )
+        }
     },
     {
         accessorKey: "category",
