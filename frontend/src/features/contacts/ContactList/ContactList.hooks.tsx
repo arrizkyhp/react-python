@@ -10,9 +10,18 @@ import {toast} from "sonner";
 import {Check} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import {usePageHeader} from "@/contexts/PageHeaderContext.tsx";
+import {ENDPOINTS} from "@/constants/apiUrl.ts";
 
 const useContactList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
+    const {
+        CONTACTS: {
+            GET: GET_CONTACTS,
+            UPDATE: UPDATE_CONTACT,
+            CREATE: CREATE_CONTACT,
+            DELETE: DELETE_CONTACT,
+        }
+    } = ENDPOINTS
 
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -23,10 +32,9 @@ const useContactList = () => {
     const [contactToDeleteId, setContactToDeleteId] = useState<number | null>(null); // State for contact ID to delete
     const [contactToDeleteName, setContactToDeleteName] = useState<string | null>(null); // New state for contact name to delete
 
-
     const { data } = useGetData<FetchContactsResponse, BaseQueryParams>(
         ['listContacts', createQueryParams(queryParams || {})],
-        '/app/contacts',
+        GET_CONTACTS,
         {
             params: {
                 page: queryParams.page,
@@ -35,12 +43,11 @@ const useContactList = () => {
         }
     )
 
-
     const {
         mutate: createContactMutation,
     } = usePostData<Contact, Omit<Contact, 'id'>>(
-        ['createContact'], // A unique key for this specific mutation operation
-        '/app/contacts', // The API endpoint
+        ['createContact'],
+        CREATE_CONTACT,
         {
             options: {
                 onSuccess: () => {
@@ -70,7 +77,7 @@ const useContactList = () => {
         mutate: updateContactMutation,
     } = usePatchData(
         ['updateContact', String(editingContactId)], // Mutation key
-        `/app/contacts/${editingContactId}`, // URL for this specific contact
+        UPDATE_CONTACT(String(editingContactId)), // URL for this specific contact
         {
             options: {
                 onSuccess: () => {
@@ -94,7 +101,7 @@ const useContactList = () => {
         mutate: deleteContactMutation,
     } = useDeleteData<void, number>(
         ['deleteContact', String(contactToDeleteId)], // Mutation key
-        `/app/contacts/${contactToDeleteId}`, // URL for this specific contact
+        DELETE_CONTACT(String(contactToDeleteId)), // URL for this specific contact
         {
             options: {
                 onSuccess: () => {
