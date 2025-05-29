@@ -1,4 +1,4 @@
-import {SheetFooter, SheetHeader} from "@/components/ui/sheet.tsx";
+import {SheetFooter, SheetHeader, SheetTitle} from "@/components/ui/sheet.tsx";
 import {MultiSelect} from "@/components/ui/MultiSelect";
 import {FormEvent, useEffect, useState} from "react";
 import useGetData from "@/hooks/useGetData.ts";
@@ -82,7 +82,7 @@ const UserAssignForm = (props: UserAssignFormProps) => {
     return (
         <>
             <SheetHeader>
-                <h2> Assign User Role </h2>
+                <SheetTitle> Assign User Role </SheetTitle>
             </SheetHeader>
 
             <div className="p-4">
@@ -123,11 +123,7 @@ const UserAssignForm = (props: UserAssignFormProps) => {
                         </Button>
                     </SheetFooter>
                 </form>
-
-
             </div>
-
-
         </>
     )
 }
