@@ -700,6 +700,32 @@
             "type": "integer",
             "description": "Number of items per page.",
             "default": 10
+          },
+          {
+            "name": "include_usage",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, includes usage statistics (number of roles and affected role names) for each permission.",
+            "default": false
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "enum": ["active", "inactive"],
+            "description": "Filter permissions by their status."
+          },
+          {
+            "name": "name_search",
+            "in": "query",
+            "type": "string",
+            "description": "Search permissions by partial name match (case-insensitive)."
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "type": "string",
+            "description": "Filter permissions by their category."
           }
         ],
         "responses": {
@@ -762,6 +788,13 @@
             "type": "integer",
             "required": true,
             "description": "The ID of the permission to retrieve."
+          },
+          {
+            "name": "include_usage",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, includes usage statistics (number of roles and affected role names) for the permission.",
+            "default": false
           }
         ],
         "responses": {
@@ -1032,7 +1065,21 @@
       "properties": {
         "id": { "type": "integer" },
         "name": { "type": "string" },
-        "description": { "type": "string", "x-nullable": true }
+        "description": { "type": "string", "x-nullable": true },
+        "category": { "type": "string", "description": "The category the permission belongs to (e.g., 'user_management', 'contact_management').", "x-nullable": true },
+        "status": { "type": "string", "enum": ["active", "inactive"], "description": "The active status of the permission.", "default": "active" },
+        "usage": { "type": "integer", "description": "The number of roles this permission is currently assigned to. Only included if `include_usage=true`." },
+        "affected_roles": {
+          "type": "array",
+          "description": "A list of roles (ID and Name) that this permission is assigned to. Only included if `include_usage=true`.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "name": { "type": "string" }
+            }
+          }
+        }
       }
     },
     "PermissionInput": {
@@ -1047,6 +1094,17 @@
           "type": "string",
           "description": "A brief description of what this permission grants.",
           "x-nullable": true
+        },
+        "category": {
+          "type": "string",
+          "description": "The category the permission belongs to.",
+          "x-nullable": true
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive"],
+          "description": "The initial status of the permission.",
+          "default": "active"
         }
       }
     },
@@ -1061,6 +1119,16 @@
           "type": "string",
           "description": "An updated description of the permission.",
           "x-nullable": true
+        },
+        "category": {
+          "type": "string",
+          "description": "An updated category for the permission.",
+          "x-nullable": true
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive"],
+          "description": "The updated status of the permission."
         }
       }
     },

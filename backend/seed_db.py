@@ -20,24 +20,24 @@ with app.app_context():
 
     # --- Create Permissions ---
     permissions_to_create = [
-        ('user.manage', 'Can create, edit, delete all users and their roles.', 'User Management'),
-        ('contact.create', 'Can create new contacts.', 'Contact Management'),
-        ('contact.read.own', 'Can read their own contacts.', 'Contact Management'),
-        ('contact.edit.own', 'Can edit their own contacts.', 'Contact Management'),
-        ('contact.delete.own', 'Can delete their own contacts.', 'Contact Management'),
-        ('contact.read.all', 'Can read all contacts.', 'Contact Management'),
-        ('contact.edit.all', 'Can edit all contacts.', 'Contact Management'),
-        ('contact.delete.all', 'Can delete all contacts.', 'Contact Management'),
-        ('role.manage', 'Can create, edit, delete roles and assign permissions to them.', 'Role Management'),
-        ('role.assign_permission', 'Can assign/unassign permissions to/from roles.', 'Role Management'),
-        ('permission.manage', 'Can create, edit, delete individual permissions.', 'Permission Management'),
+        ('user.manage', 'Can create, edit, delete all users and their roles.', 'User Management', 'active'),
+        ('contact.create', 'Can create new contacts.', 'Contact Management', 'active'),
+        ('contact.read.own', 'Can read their own contacts.', 'Contact Management', 'active'),
+        ('contact.edit.own', 'Can edit their own contacts.', 'Contact Management', 'active'),
+        ('contact.delete.own', 'Can delete their own contacts.', 'Contact Management', 'active'),
+        ('contact.read.all', 'Can read all contacts.', 'Contact Management', 'active'),
+        ('contact.edit.all', 'Can edit all contacts.', 'Contact Management', 'active'),
+        ('contact.delete.all', 'Can delete all contacts.', 'Contact Management', 'active'),
+        ('role.manage', 'Can create, edit, delete roles and assign permissions to them.', 'Role Management', 'active'),
+        ('role.assign_permission', 'Can assign/unassign permissions to/from roles.', 'Role Management', 'active'),
+        ('permission.manage', 'Can create, edit, delete individual permissions.', 'Permission Management', 'active'),
         ('permission.read.all', 'Can read all permissions.', 'Permission Management', 'active'),
         ('permission.create', 'Can create new permissions.', 'Permission Management', 'active'),
         ('permission.update', 'Can update existing permissions.', 'Permission Management', 'active'),
         ('permission.delete', 'Can delete permissions.', 'Permission Management', 'active'),
     ]
 
-    for name, desc, category, status in permissions_to_create:  # <-- Unpack the new 'status'
+    for name, desc, category, status in permissions_to_create:
         perm = Permission.query.filter_by(name=name).first()
         if not perm:
             # Pass category and status to the Permission constructor
@@ -112,14 +112,17 @@ with app.app_context():
         admin_user.set_password('adminpassword')  # CHANGE THIS FOR PRODUCTION!
         db.session.add(admin_user)
         # Clear existing roles and assign Admin role for idempotency
-        if admin_user.roles.count() > 0:
+        # Use len() to check if the collection is not empty
+        if len(admin_user.roles) > 0:
             admin_user.roles.clear()
         if role_admin:
             admin_user.roles.append(role_admin)
         print("Created admin user.")
-    elif role_admin not in admin_user.roles:  # If admin exists but doesn't have role
+    # Check if admin exists but doesn't have the Admin role, then assign it
+    elif role_admin and role_admin not in admin_user.roles:
         admin_user.roles.append(role_admin)
         print("Ensured admin user has Admin role.")
+
 
     regular_user = User.query.filter_by(username='user').first()
     if not regular_user:
@@ -127,14 +130,17 @@ with app.app_context():
         regular_user.set_password('userpassword')  # CHANGE THIS FOR PRODUCTION!
         db.session.add(regular_user)
         # Clear existing roles and assign User role for idempotency
-        if regular_user.roles.count() > 0:
+        # Use len() to check if the collection is not empty
+        if len(regular_user.roles) > 0:
             regular_user.roles.clear()
         if role_user:
             regular_user.roles.append(role_user)
         print("Created regular user.")
-    elif role_user not in regular_user.roles:  # If user exists but doesn't have role
+    # Check if user exists but doesn't have the User role, then assign it
+    elif role_user and role_user not in regular_user.roles:
         regular_user.roles.append(role_user)
         print("Ensured regular user has User role.")
+
 
     db.session.commit()
     print("Database seeding complete!")
