@@ -74,12 +74,9 @@ const UserAssignForm = (props: UserAssignFormProps) => {
             role_ids: selectedRoles,
         }
 
-        console.log(data);
         updateUserMutation(data)
 
     }
-
-
 
 
     return (

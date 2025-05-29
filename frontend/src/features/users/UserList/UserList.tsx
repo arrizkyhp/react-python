@@ -65,12 +65,12 @@ const UserList = () => {
                 data={data?.items || []}
                 rowActions={[
                     {
+                        label: "Assign Role", // Added label
                         color: "secondary",
                         icon: <UserCog className="h-4 w-4" />,
                         onClick: (user) => handleOpenAssignUser(user),
                         tooltip: "Assign Role",
                     },
-
                 ]}
                 pagination={{
                     currentPage: data?.pagination.current_page || 1,

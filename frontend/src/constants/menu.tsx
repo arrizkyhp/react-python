@@ -14,12 +14,12 @@ export const menu: MenuItem[] = [
         submenu: [
             {
                 title: "Users",
-                url: "/user",
+                url: "/users",
                 icon: UserRound,
             },
             {
                 title: "Roles",
-                url: "/role",
+                url: "/roles",
                 icon: ShieldUser,
             },
             {
@@ -31,7 +31,7 @@ export const menu: MenuItem[] = [
     },
     {
         title: "Contact",
-        url: "/contact",
+        url: "/contacts",
         icon: Contact,
     },
     {

@@ -1,10 +1,11 @@
-export type QueryObject = Record<string, string | number | undefined>;
-
 export type BaseQueryParams = {
     s?: string;
     page?: number;
     size?: number;
-} & QueryObject;
+    per_page?: string;
+    status?: string;
+    include_usage?: boolean;
+};
 
 export interface PaginationInfo {
     current_page: number;

@@ -13,6 +13,7 @@ import RolePage from "@/pages/Role/RolePage.tsx";
 import RoleDetailPage from "@/pages/Role/RoleDetail.tsx";
 import RoleCreatePage from "@/pages/Role/RoleCreate.tsx";
 import MainContentLayout from '@/components/layouts/MainContentLayout';
+import PermissionsPage from "@/pages/Permissions/PermissionsPage.tsx";
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -34,11 +35,11 @@ const router = createBrowserRouter([
                         element: <ContactPage />,
                     },
                     {
-                        path: "User",
+                        path: "Users",
                         element: <UserPage />,
                     },
                     {
-                        path: "Role",
+                        path: "Roles",
                         children: [
                             {
                                 index: true,
@@ -59,7 +60,11 @@ const router = createBrowserRouter([
                         ],
                     },
                     {
-                        path: "Contact", // Explicit Contact route
+                        path: "Permissions",
+                        element: <PermissionsPage />,
+                    },
+                    {
+                        path: "Contacts",
                         element: <ContactPage />,
                     },
                 ],
