@@ -1,12 +1,6 @@
-import useQueryParams from "@/hooks/useQueryParams.ts";
-import useGetData from "@/hooks/useGetData.ts";
-import {BaseQueryParams, ListResponse} from "@/types/responses.ts";
-import createQueryParams from "@/utils/createQueryParams.ts";
 import DataTable from "@/components/ui/DataTable";
 import { columns } from "./RoleList.constants";
-import {Role} from "@/types/role.ts";
-import {Check, EyeIcon, PencilIcon, TrashIcon} from "lucide-react";
-import {useNavigate} from "react-router-dom";
+import {EyeIcon, PencilIcon, TrashIcon} from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -17,92 +11,21 @@ import {
     AlertDialogTitle
 } from "@/components/ui/alert-dialog.tsx";
 import {Button} from "@/components/ui/button.tsx";
-import {useMemo, useState} from "react";
-import {useDeleteData} from "@/hooks/useMutateData.ts";
-import {toast} from "sonner";
-import {usePageHeader} from "@/contexts/PageHeaderContext.tsx";
+import useRoleList from "@/features/roles/RoleList/RoleList.hooks.tsx";
 
 const RoleList = () => {
-    const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
-    const navigate = useNavigate();
-
-    const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
-    const [deleteRoleId, setDeleteRoleId] = useState('');
-    const [deleteRoleName, setDeleteRoleName] = useState('');
-
-    const { data } = useGetData<ListResponse<Role>, BaseQueryParams>(
-        ['roleList', createQueryParams(queryParams || {})],
-        '/app/roles',
-        {
-            params: {
-                page: queryParams.page,
-                per_page: queryParams.per_page || '10',
-            },
-        }
-    )
-
-    const handleCreateRole = () => {
-        navigate("/role/create");
-    }
-
-    const userHeaderConfig = useMemo(() => ({
-        title: "Role List",
-        breadcrumbs: [{ label: "Role List" }],
-        showBackButton: false,
-        actions: (
-            <Button
-                className="bg-green-600 hover:bg-green-700"
-                onClick={handleCreateRole}
-            >
-                Create Role
-            </Button>
-        )
-    }), []);
-
-    usePageHeader(userHeaderConfig);
-
     const {
-        mutate: deleteRoleMutation,
-    } = useDeleteData<void, number>(
-        ['deleteContact', String(deleteRoleId)],
-        `/app/roles/${deleteRoleId}`,
-        {
-            options: {
-                onSuccess: () => {
-                    toast('Role deleted successfully', {
-                        position: 'top-center',
-                        icon: <Check />
-                    });
-                    setIsAlertDialogOpen(false);
-                    setDeleteRoleId('');
-                    setDeleteRoleName('');
-
-                },
-                onError: (err) => toast(`Delete failed: ${err.message}`),
-            },
-        },
-        ['roleList'], // Invalidate the contacts list after deletion
-    );
-
-    const onDetailClick = (role: Role) => {
-        navigate(`${role.id}`);
-    }
-
-    const onEditClick = (role: Role) => {
-        navigate(`${role.id}/edit`); // Navigate directly to the edit URL
-    }
-
-    const onDeleteClick = (role: Role) => {
-        setDeleteRoleId(String(role.id))
-        setIsAlertDialogOpen(true)
-        setDeleteRoleName(role.name)
-    }
-
-    const handleDeleteRoleConfirm = () => {
-        if (deleteRoleId !== '') {
-            deleteRoleMutation(Number(deleteRoleId));
-        }
-    }
+        data,
+        onDetailClick,
+        onEditClick,
+        onDeleteClick,
+        onPageChange,
+        onPageSizeChange,
+        isAlertDialogOpen,
+        setIsAlertDialogOpen,
+        deleteRoleName,
+        handleDeleteRoleConfirm,
+    } = useRoleList()
 
     return (
         <div>
@@ -111,20 +34,23 @@ const RoleList = () => {
                 data={data?.items || []}
                 rowActions={[
                     {
+                        label: "View Details",
                         color: "secondary",
                         icon: <EyeIcon className="h-4 w-4" />,
                         onClick: (role) => onDetailClick(role),
                         tooltip: "View",
                     },
                     {
+                        label: "Edit",
                         color: "default",
                         icon: <PencilIcon className="h-4 w-4" />,
                         onClick: (role) => onEditClick(role),
                         tooltip: "Edit",
                     },
                     {
+                        label: "Delete",
                         color: "destructive",
-                        icon: <TrashIcon className="h-4 w-4" />,
+                        icon: <TrashIcon className="h-4 w-4 text-destructive" />,
                         onClick: (role) => onDeleteClick(role),
                         tooltip: "Delete",
                     },

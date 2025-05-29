@@ -163,7 +163,7 @@ const DataTable = <TData, TValue>({
                                         </TableCell>
                                     ))}
                                     {rowActions.length > 0 && (
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-center">
                                             <DropdownMenu modal={false}>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" className="h-8 w-8 p-0">

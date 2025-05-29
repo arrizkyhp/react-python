@@ -10,10 +10,10 @@ import LayoutWithSidebar from "@/components/layouts/LayoutWithSidebar";
 import LoginPage from "@/pages/Login/LoginPage.tsx";
 import {RedirectIfAuthenticated} from "@/components/layouts/ProtectedRoute";
 import RolePage from "@/pages/Role/RolePage.tsx";
-import RoleDetailPage from "@/pages/Role/RoleDetail.tsx";
-import RoleCreatePage from "@/pages/Role/RoleCreate.tsx";
+import RoleDetailPage from "@/pages/Role/RoleDetailPage.tsx";
 import MainContentLayout from '@/components/layouts/MainContentLayout';
 import PermissionsPage from "@/pages/Permissions/PermissionsPage.tsx";
+import RoleCreatePage from "@/features/roles/RoleCreate";
 
 const queryClient = new QueryClient();
 const router = createBrowserRouter([

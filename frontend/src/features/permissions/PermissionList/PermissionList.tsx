@@ -5,13 +5,13 @@ import {BaseQueryParams} from "@/types/responses.ts";
 import createQueryParams from "@/utils/createQueryParams.ts";
 import {PermissionResponse} from "@/features/permissions/PermissionList/PermissionList.types.ts";
 import useQueryParams from "@/hooks/useQueryParams.ts";
-import { ENDPOINT } from "@/constants/apiUrl";
+import { ENDPOINTS } from "@/constants/apiUrl";
 import DataTable from "@/components/ui/DataTable";
 import { columns } from "./PermissionList.constants";
 
 const PermissionList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
-    const { PERMISSIONS: { GET } } = ENDPOINT
+    const { PERMISSIONS: { GET } } = ENDPOINTS
 
     const userHeaderConfig = useMemo(() => ({
         title: "Permission List",

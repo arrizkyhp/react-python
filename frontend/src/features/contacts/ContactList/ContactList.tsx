@@ -60,14 +60,16 @@ const ContactList = () => {
                 data={data?.items || []}
                 rowActions={[
                     {
+                        label: "Edit",
                         color: "secondary",
                         icon: <PencilIcon className="h-4 w-4" />,
                         onClick: (contact) => handleOpenEditSheet(contact),
                         tooltip: "Edit contact",
                     },
                     {
+                        label: "Delete",
                         color: "destructive",
-                        icon: <TrashIcon className="h-4 w-4" />,
+                        icon: <TrashIcon className="h-4 w-4 text-destructive" />,
                         onClick: (contact) => handleDeleteContact(contact),
                         tooltip: "Delete contact",
                     },

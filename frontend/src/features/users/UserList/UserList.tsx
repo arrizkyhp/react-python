@@ -1,50 +1,20 @@
-import useQueryParams from "@/hooks/useQueryParams.ts";
 import DataTable from "@/components/ui/DataTable";
 import {columns} from "@/features/users/UserList/UserList.constants.tsx";
-import useGetData from "@/hooks/useGetData.ts";
-import createQueryParams from "@/utils/createQueryParams.ts";
-import {FetchUsersResponse} from "@/features/users/UserList/UserList.types.ts";
-import {BaseQueryParams} from "@/types/responses.ts";
 import { UserCog} from "lucide-react";
 import {Sheet, SheetContent} from "@/components/ui/sheet.tsx";
-import {useMemo, useState} from "react";
 import UserAssignForm from "@/features/users/UserAssignForm.tsx";
-import {User} from "@/types/user.ts";
-import { usePageHeader } from "@/contexts/PageHeaderContext";
+import useUserList from "@/features/users/UserList/UserList.hooks.ts";
 
 const UserList = () => {
-    const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
-    const [isSheetOpen, setIsSheetOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<User>({
-        id: 0,
-        username: '',
-        email: '',
-        roles: [],
-    });
-
-    const userHeaderConfig = useMemo(() => ({
-        title: "User List",
-        breadcrumbs: [{ label: "User List" }],
-        showBackButton: false,
-    }), []);
-
-    usePageHeader(userHeaderConfig);
-
-    const { data } = useGetData<FetchUsersResponse, BaseQueryParams>(
-        ['userList', createQueryParams(queryParams || {})],
-        '/app/users',
-        {
-            params: {
-                page: queryParams.page,
-                per_page: queryParams.per_page || '10',
-            },
-        }
-    )
-
-    const handleOpenAssignUser = (user: User) => {
-        setIsSheetOpen(true);
-        setSelectedUser(user);
-    }
+    const {
+        isSheetOpen,
+        setIsSheetOpen,
+        selectedUser,
+        data,
+        handleOpenAssignUser,
+        onPageChange,
+        onPageSizeChange
+    } = useUserList()
 
     return (
         <>
