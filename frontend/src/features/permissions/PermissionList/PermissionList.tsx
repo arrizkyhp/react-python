@@ -8,16 +8,19 @@ import useQueryParams from "@/hooks/useQueryParams.ts";
 import { ENDPOINTS } from "@/constants/apiUrl";
 import DataTable from "@/components/ui/DataTable";
 import { columns } from "./PermissionList.constants";
-import {EyeIcon} from "lucide-react";
+import {EyeIcon, PencilIcon} from "lucide-react";
 import {Permission} from "@/types/permission.ts";
 import {Sheet, SheetContent} from "@/components/ui/sheet.tsx";
 import PermissionDetail from "@/features/permissions/PermissionDetail";
+import {Button} from "@/components/ui/button.tsx";
 
 const PermissionList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
     const { PERMISSIONS: { GET } } = ENDPOINTS
 
-    const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
+    const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+
     const [selectedPermissions, setSelectedPermissions] = useState<Permission>({
         id: 0,
         category: "",
@@ -28,13 +31,7 @@ const PermissionList = () => {
         affected_roles: [],
     });
 
-    const userHeaderConfig = useMemo(() => ({
-        title: "Permission List",
-        breadcrumbs: [{ label: "Permission List" }],
-        showBackButton: false,
-    }), []);
 
-    usePageHeader(userHeaderConfig);
 
     const { data } = useGetData<PermissionResponse, BaseQueryParams>(
         ['permissionList', createQueryParams(queryParams || {})],
@@ -51,19 +48,54 @@ const PermissionList = () => {
 
     const handleDetailClick = (permission: Permission) => {
         setSelectedPermissions(permission)
-        setIsSheetOpen(true)
+        setIsDetailSheetOpen(true)
     }
+
+    const handleEditClick = (permission: Permission) => {
+        setSelectedPermissions(permission);
+        setIsEditSheetOpen(true);
+    };
+
+    const handleCreateClick = () => {
+        setIsEditSheetOpen(true);
+    };
+
+    const userHeaderConfig = useMemo(() => ({
+        title: "Permission List",
+        breadcrumbs: [{ label: "Permission List" }],
+        showBackButton: false,
+        actions: (
+            <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={handleCreateClick}
+            >
+                Create Permission
+            </Button>
+        )
+    }), []);
+
+    usePageHeader(userHeaderConfig);
 
     return (
         <>
             <div className="flex flex-col gap-4">
-                <p className="font-fira-code">Whereas disregard and contempt for human rights have resulted</p>
-                <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <Sheet open={isDetailSheetOpen} onOpenChange={setIsDetailSheetOpen}>
                     <SheetContent>
                         <PermissionDetail
                             data={selectedPermissions}
                         />
 
+                    </SheetContent>
+                </Sheet>
+
+                <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
+                    <SheetContent>
+                        Edit
+
+                        {/*<PermissionEdit*/}
+                        {/*    data={selectedPermissions}*/}
+                        {/*    onClose={() => setIsEditSheetOpen(false)} // Pass a close handler*/}
+                        {/*/>*/}
                     </SheetContent>
                 </Sheet>
             </div>
@@ -78,7 +110,13 @@ const PermissionList = () => {
                         onClick: (permission) => handleDetailClick(permission),
                         tooltip: "View",
                     },
-
+                    {
+                        label: "Edit",
+                        color: "default",
+                        icon: <PencilIcon className="h-4 w-4" />,
+                        onClick: (permission) => handleEditClick(permission),
+                        tooltip: "Edit",
+                    },
                 ]}
                 pagination={{
                     currentPage: data?.pagination.current_page || 1,

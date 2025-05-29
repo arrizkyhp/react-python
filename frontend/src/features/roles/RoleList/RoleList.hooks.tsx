@@ -48,12 +48,12 @@ const useRoleList = () => {
             actions: (
                 <Button
                     className="bg-green-600 hover:bg-green-700"
-            onClick={handleCreateRole}
-            >
-            Create Role
+                onClick={handleCreateRole}
+                >
+                    Create Role
                 </Button>
-    )
-}), []);
+            )
+    }), []);
 
     usePageHeader(userHeaderConfig);
 

@@ -1,4 +1,16 @@
-import {Calendar, Contact, Home, Inbox, KeyRound, Search, Settings, ShieldUser, UserRound, Users} from "lucide-react";
+import {
+    Calendar,
+    Contact,
+    FolderTree,
+    Home,
+    Inbox,
+    KeyRound,
+    Search,
+    Settings,
+    ShieldUser,
+    UserRound,
+    Users
+} from "lucide-react";
 import {MenuItem} from "@/types/menu.ts";
 
 export const menu: MenuItem[] = [
@@ -23,9 +35,14 @@ export const menu: MenuItem[] = [
                 icon: ShieldUser,
             },
             {
-                title: "Permissions", // Added here!
-                url: "/permissions", // Assuming a route for permissions
-                icon: KeyRound, // A key or lock icon would be suitable
+                title: "Permissions",
+                url: "/permissions",
+                icon: KeyRound,
+            },
+            {
+                title: "Categories",
+                url: "/categories",
+                icon: FolderTree,
             },
         ],
     },
