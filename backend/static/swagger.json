@@ -25,6 +25,10 @@
     {
       "name": "Permission Management",
       "description": "Operations for managing system permissions (Admin/Permission Required)"
+    },
+    {
+      "name": "Category Management",
+      "description": "Operations for managing permission categories (Admin/Permission Required)"
     }
   ],
   "securityDefinitions": {
@@ -709,6 +713,13 @@
             "default": false
           },
           {
+            "name": "include_category_details",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, includes the full category object for each permission.",
+            "default": false
+          },
+          {
             "name": "status",
             "in": "query",
             "type": "string",
@@ -722,10 +733,17 @@
             "description": "Search permissions by partial name match (case-insensitive)."
           },
           {
-            "name": "category",
+            "name": "category_id",
+            "in": "query",
+            "type": "integer",
+            "description": "Filter permissions by their category ID."
+          },
+          {
+            "name": "category_name",
             "in": "query",
             "type": "string",
-            "description": "Filter permissions by their category."
+            "description": "Search permissions by partial category name match (case-insensitive).",
+            "example": "User"
           }
         ],
         "responses": {
@@ -795,6 +813,13 @@
             "type": "boolean",
             "description": "If true, includes usage statistics (number of roles and affected role names) for the permission.",
             "default": false
+          },
+          {
+            "name": "include_category_details",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, includes the full category object for the permission.",
+            "default": false
           }
         ],
         "responses": {
@@ -860,6 +885,202 @@
         "responses": {
           "200": {
             "description": "Permission deleted successfully.",
+            "schema": { "$ref": "#/definitions/SuccessMessage" }
+          },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" },
+          "404": { "$ref": "#/responses/NotFoundError" },
+          "409": { "$ref": "#/responses/ConflictError" }
+        }
+      }
+    },
+    "/app/categories": {
+      "get": {
+        "summary": "Get a list of permission categories.",
+        "tags": ["Category Management"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "description": "Page number for pagination.",
+            "default": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of items per page.",
+            "default": 10
+          },
+          {
+            "name": "include_usage",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, includes usage statistics (number of associated permissions).",
+            "default": false
+          },
+          {
+            "name": "include_affected_permissions",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, includes a list of affected permissions (ID, name, status). Requires `include_usage=true` to be effective.",
+            "default": false
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "enum": ["active", "inactive"],
+            "description": "Filter categories by their status."
+          },
+          {
+            "name": "name_search",
+            "in": "query",
+            "type": "string",
+            "description": "Search categories by partial name match (case-insensitive)."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of categories and pagination information.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Category" }
+                },
+                "pagination": { "$ref": "#/definitions/Pagination" }
+              }
+            }
+          },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" }
+        }
+      },
+      "post": {
+        "summary": "Create a new permission category.",
+        "tags": ["Category Management"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/CategoryInput" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Category created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "category": { "$ref": "#/definitions/Category" }
+              }
+            }
+          },
+          "400": { "$ref": "#/responses/BadRequestError" },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" },
+          "409": { "$ref": "#/responses/ConflictError" }
+        }
+      }
+    },
+    "/app/categories/{category_id}": {
+      "get": {
+        "summary": "Get a single permission category by ID.",
+        "tags": ["Category Management"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "type": "integer",
+            "required": true,
+            "description": "The ID of the category to retrieve."
+          },
+          {
+            "name": "include_usage",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, includes usage statistics (number of associated permissions).",
+            "default": false
+          },
+          {
+            "name": "include_affected_permissions",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, includes a list of affected permissions (ID, name, status). Requires `include_usage=true` to be effective.",
+            "default": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category details.",
+            "schema": { "$ref": "#/definitions/Category" }
+          },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" },
+          "404": { "$ref": "#/responses/NotFoundError" }
+        }
+      },
+      "patch": {
+        "summary": "Update an existing permission category.",
+        "tags": ["Category Management"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "type": "integer",
+            "required": true,
+            "description": "The ID of the category to update."
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/CategoryUpdateInput" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category updated successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "category": { "$ref": "#/definitions/Category" }
+              }
+            }
+          },
+          "400": { "$ref": "#/responses/BadRequestError" },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" },
+          "404": { "$ref": "#/responses/NotFoundError" },
+          "409": { "$ref": "#/responses/ConflictError" }
+        }
+      },
+      "delete": {
+        "summary": "Delete a permission category.",
+        "tags": ["Category Management"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "category_id",
+            "in": "path",
+            "type": "integer",
+            "required": true,
+            "description": "The ID of the category to delete."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted successfully.",
             "schema": { "$ref": "#/definitions/SuccessMessage" }
           },
           "401": { "$ref": "#/responses/UnauthorizedError" },
@@ -1060,13 +1281,80 @@
         }
       }
     },
+    "Category": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "description": { "type": "string", "x-nullable": true },
+        "status": { "type": "string", "enum": ["active", "inactive"], "description": "The active status of the category.", "default": "active" },
+        "usage": { "type": "integer", "description": "The number of permissions associated with this category. Only included if `include_usage=true`." },
+        "affected_permissions": {
+          "type": "array",
+          "description": "A list of permissions (ID, name, status) associated with this category. Only included if `include_affected_permissions=true`.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer" },
+              "name": { "type": "string" },
+              "status": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "CategoryInput": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The unique name of the permission category (e.g., 'User Management')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the category.",
+          "x-nullable": true
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive"],
+          "description": "The initial status of the category.",
+          "default": "active"
+        }
+      }
+    },
+    "CategoryUpdateInput": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The new unique name of the category."
+        },
+        "description": {
+          "type": "string",
+          "description": "An updated description of the category.",
+          "x-nullable": true
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive"],
+          "description": "The updated status of the category."
+        }
+      }
+    },
     "Permission": {
       "type": "object",
       "properties": {
         "id": { "type": "integer" },
         "name": { "type": "string" },
         "description": { "type": "string", "x-nullable": true },
-        "category": { "type": "string", "description": "The category the permission belongs to (e.g., 'user_management', 'contact_management').", "x-nullable": true },
+        "category_id": { "type": "integer", "description": "The ID of the category the permission belongs to.", "x-nullable": true },
+        "category": {
+          "$ref": "#/definitions/CategoryBasic",
+          "description": "The detailed category object for the permission. Only included if `include_category_details=true`.",
+          "x-nullable": true
+        },
         "status": { "type": "string", "enum": ["active", "inactive"], "description": "The active status of the permission.", "default": "active" },
         "usage": { "type": "integer", "description": "The number of roles this permission is currently assigned to. Only included if `include_usage=true`." },
         "affected_roles": {
@@ -1095,9 +1383,9 @@
           "description": "A brief description of what this permission grants.",
           "x-nullable": true
         },
-        "category": {
-          "type": "string",
-          "description": "The category the permission belongs to.",
+        "category_id": {
+          "type": "integer",
+          "description": "The ID of the category the permission belongs to.",
           "x-nullable": true
         },
         "status": {
@@ -1120,9 +1408,9 @@
           "description": "An updated description of the permission.",
           "x-nullable": true
         },
-        "category": {
-          "type": "string",
-          "description": "An updated category for the permission.",
+        "category_id": {
+          "type": "integer",
+          "description": "An updated category ID for the permission. Set to `null` to remove category association.",
           "x-nullable": true
         },
         "status": {
@@ -1131,6 +1419,15 @@
           "description": "The updated status of the permission."
         }
       }
+    },
+    "CategoryBasic": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "integer" },
+        "name": { "type": "string" },
+        "description": { "type": "string", "x-nullable": true }
+      },
+      "description": "Basic details of a category without usage information."
     },
     "SuccessMessage": {
       "type": "object",

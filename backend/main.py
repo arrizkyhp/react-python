@@ -1,11 +1,8 @@
 from app import  register_blueprints
 from app.config import create_app, db
-from flask_migrate import Migrate
 
 if __name__ == "__main__":
     app = create_app()
-
-    migrate = Migrate(app, db)
 
     register_blueprints(app)
 

@@ -2,9 +2,11 @@ from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from flask_login import LoginManager
+from flask_migrate import Migrate
 
 db = SQLAlchemy()
 login_manager = LoginManager()
+migrate = Migrate()
 
 @login_manager.unauthorized_handler
 def unauthorized():
@@ -32,6 +34,7 @@ def create_app():
 
     db.init_app(app)
     login_manager.init_app(app)  # Initialize LoginManager with the app
+    migrate.init_app(app, db)
     # login_manager.login_view = "auth.login"  # The route name for the login page (we'll create this)
     login_manager.session_protection = "strong"  # Optional: for better security
 

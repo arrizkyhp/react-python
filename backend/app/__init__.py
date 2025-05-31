@@ -34,5 +34,5 @@ def register_blueprints(app_instance): # Pass the app instance
     app_instance.register_blueprint(users_bp, url_prefix="/api/app")
     app_instance.register_blueprint(roles_bp, url_prefix="/api/app")
     app_instance.register_blueprint(permissions_bp, url_prefix="/api/app")
-    app_instance.register_blueprint(categories_bp, url_prefix="/api")
+    app_instance.register_blueprint(categories_bp, url_prefix="/api/app")
     app_instance.register_blueprint(auth_bp, url_prefix="/api/auth") # Auth routes

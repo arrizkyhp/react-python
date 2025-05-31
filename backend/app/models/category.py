@@ -13,7 +13,7 @@ class Category(db.Model):
     permissions = db.relationship(
         "Permission",
         backref="category_obj",  # Renamed backref to avoid conflict with 'category' attribute
-        lazy=True,
+        lazy='dynamic',
         cascade="all, delete-orphan"  # If category is deleted, related permissions might need to be handled
         # (e.g., set their category_id to NULL, or delete them)
         # For now, let's assume setting to NULL is better

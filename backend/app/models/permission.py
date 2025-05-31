@@ -6,7 +6,11 @@ class Permission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)  # e.g., 'user.create', 'contact.edit.own'
     description = db.Column(db.String(255), nullable=True)
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
+    category_id = db.Column(
+        db.Integer,
+        db.ForeignKey('categories.id', name='fk_permissions_category_id'),
+        nullable=True
+    )
     status = db.Column(db.String(20), default='active', nullable=False)
 
     # `category` property will now refer to the Category object
