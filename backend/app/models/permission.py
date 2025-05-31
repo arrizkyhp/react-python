@@ -6,23 +6,44 @@ class Permission(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)  # e.g., 'user.create', 'contact.edit.own'
     description = db.Column(db.String(255), nullable=True)
-    category = db.Column(db.String(80), nullable=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=True)
     status = db.Column(db.String(20), default='active', nullable=False)
 
-    def to_json(self, include_usage=False):
+    # `category` property will now refer to the Category object
+    # The backref 'category_obj' from the Category model links this
+    # category = db.relationship("Category", backref="permissions") # This line is implicitly handled by backref on Category
+
+    # Existing backref for roles (assuming it's defined in Role model)
+    # roles = db.relationship('Role', secondary=role_permission_table, back_populates='permissions')
+
+    def to_json(self, include_usage=False, include_category_details=False):
         """
         Converts the Permission object to a JSON-serializable dictionary.
         Args:
             include_usage (bool): If True, includes 'usage' (count of affected roles)
                                   and 'affected_roles' (list of role dicts).
+            include_category_details (bool): If True, includes the associated category's details.
         """
         data = {
             "id": self.id,
             "name": self.name,
             "description": self.description,
-            "category": self.category,
+            # category_id instead of string category
+            "category_id": self.category_id,
             "status": self.status
         }
+
+        if include_category_details and self.category_obj:  # Use category_obj from the backref
+            data["category"] = {
+                "id": self.category_obj.id,
+                "name": self.category_obj.name,
+                "description": self.category_obj.description
+            }
+        elif self.category_id and not self.category_obj:
+            # Handle case where category_id exists but object couldn't be loaded (e.g., category deleted)
+            data["category"] = {"id": self.category_id, "name": "Category Not Found", "description": None}
+        else:
+            data["category"] = None  # No category associated
 
         # --- FOR USAGE TRACKING ---
         if include_usage:
