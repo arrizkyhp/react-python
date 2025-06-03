@@ -1,25 +1,26 @@
 from datetime import datetime
-from ..config import db # Assuming db is your SQLAlchemy instance
+from ..config import db  # Assuming db is your SQLAlchemy instance
 import json
+
 
 class AuditLog(db.Model):
     __tablename__ = "audit_logs"
 
-    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), nullable=False)
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-    action_type = db.Column(db.String(50), nullable=False) # e.g., 'CREATE', 'UPDATE', 'DELETE'
-    entity_type = db.Column(db.String(100), nullable=False) # e.g., 'Category', 'Permission', 'Role'
-    entity_id = db.Column(db.Integer, nullable=True) # ID of the record being audited
-    field_name = db.Column(db.String(100), nullable=True) # The specific field changed (for UPDATEs)
-    old_value = db.Column(db.Text, nullable=True) # Stored as JSON string
-    new_value = db.Column(db.Text, nullable=True) # Stored as JSON string
-    description = db.Column(db.Text, nullable=True) # Human-readable description
-    ip_address = db.Column(db.String(45), nullable=True) # IPv4 or IPv6
+    action_type = db.Column(db.String(50), nullable=False)  # e.g., 'CREATE', 'UPDATE', 'DELETE'
+    entity_type = db.Column(db.String(100), nullable=False)  # e.g., 'Category', 'Permission', 'Role'
+    entity_id = db.Column(db.Integer, nullable=True)  # ID of the record being audited
+    field_name = db.Column(db.String(100), nullable=True)  # The specific field changed (for UPDATEs)
+    old_value = db.Column(db.Text, nullable=True)  # Stored as JSON string
+    new_value = db.Column(db.Text, nullable=True)  # Stored as JSON string
+    description = db.Column(db.Text, nullable=True)  # Human-readable description
+    ip_address = db.Column(db.String(45), nullable=True)  # IPv4 or IPv6
     user_agent = db.Column(db.Text, nullable=True)
 
     # Relationship to User model for easier access to user details
-    # Assuming your User model is in `backend.app.models.user`
     user = db.relationship('User', backref='audit_logs', lazy=True)
 
     def __repr__(self):
@@ -46,9 +47,8 @@ class AuditLog(db.Model):
         }
         if self.user:
             # IMPORTANT: Adjust this based on what 'User' attribute you want to display
-            # e.g., self.user.username, self.user.email, or a to_json() method
             data['user_details'] = {
                 'id': self.user.id,
-                'username': self.user.username # Or self.user.email, or self.user.to_json()
+                'username': getattr(self.user, 'username', None) or getattr(self.user, 'email', 'Unknown')
             }
         return data
