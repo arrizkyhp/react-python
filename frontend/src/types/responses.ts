@@ -2,7 +2,7 @@ export type BaseQueryParams = {
     s?: string;
     page?: number;
     size?: number;
-    per_page?: string;
+    per_page?: number;
     status?: string;
     get_all?: boolean;
     include_usage?: boolean;
