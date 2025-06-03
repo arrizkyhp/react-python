@@ -1,4 +1,4 @@
-import {Clock, Plus, SquarePen, Trash2, User} from "lucide-react";
+import {ArrowDown, ArrowUp, ArrowUpDown, CalendarIcon, Clock, Filter, Plus, Search, SquarePen, Trash2, User, X} from "lucide-react";
 import {ENDPOINTS} from "@/constants/apiUrl.ts";
 import useGetData from "@/hooks/useGetData.ts";
 import {BaseQueryParams, ListResponse} from "@/types/responses.ts";
@@ -12,6 +12,20 @@ import { Button } from "@/components/ui/button";
 import useQueryParams from "@/hooks/useQueryParams.ts";
 import createQueryParams from "@/utils/createQueryParams.ts";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import {SortDirection, SortFieldAudit} from "@/types/sort.ts";
+import {Separator} from "@/components/ui/separator.tsx";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+
+export const formatMonthDay = (date: Date | undefined): string => {
+    if (!date) {
+        return "";
+    }
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(date);
+};
 
 const RoleAuditTrail = () => {
     const {
@@ -21,6 +35,15 @@ const RoleAuditTrail = () => {
     } = ENDPOINTS;
 
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
+
+    const [sortField, setSortField] = useState<SortFieldAudit>("timestamp")
+    const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
+    const [actionFilter, setActionFilter] = useState<string>("all")
+    const [userFilter, setUserFilter] = useState<string>("all")
+    const [dateFrom, setDateFrom] = useState<Date | undefined>()
+    const [dateTo, setDateTo] = useState<Date | undefined>()
+
+    const [searchTerm, setSearchTerm] = useState("")
 
     const { data: dataAuditTrail } = useGetData<ListResponse<AuditTrail>, BaseQueryParams>(
         ['auditTrailRole', createQueryParams(queryParams || {})],
@@ -113,6 +136,36 @@ const RoleAuditTrail = () => {
         )
         : 0;
 
+    const getSortIcon = (field: SortFieldAudit) => {
+        if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />
+        return sortDirection === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
+    }
+
+    const handleSort = (field: SortFieldAudit) => {
+        if (sortField === field) {
+            setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+        } else {
+            setSortField(field)
+            setSortDirection("desc")
+        }
+    }
+
+    const handleFilterChange = () => {
+        onPageChange(1)
+    }
+
+    const hasActiveFilters = searchTerm || actionFilter !== "all" || userFilter !== "all" || dateFrom || dateTo
+
+
+    const clearFilters = () => {
+        setSearchTerm("")
+        setActionFilter("all")
+        setUserFilter("all")
+        setDateFrom(undefined)
+        setDateTo(undefined)
+        onPageChange(1)
+    }
+
 
     return (
         <div className="mt-2">
@@ -120,27 +173,223 @@ const RoleAuditTrail = () => {
                 <Clock className="h-5 w-5"/>
                 <h2 className="font-semibold text-2xl">Role Management Audit Trail</h2>
             </div>
-            <div>
-                <Select
-                    onValueChange={(value) => {
-                        if (pagination && onPageSizeChange) {
-                            onPageSizeChange(Number(value));
-                        }
-                    }}
-                    defaultValue={String(pagination?.per_page) || '10'}
-                >
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select page size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectItem value="10">10</SelectItem>
-                            <SelectItem value="25">25</SelectItem>
-                            <SelectItem value="50">50</SelectItem>
-                            <SelectItem value="100">100</SelectItem>
-                        </SelectGroup>
-                    </SelectContent>
-                </Select>
+            <div className="flex my-4">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Search by username, description, entity type, and field name..."
+                        value={searchTerm}
+                        onChange={(e) => {
+                            setSearchTerm(e.target.value)
+                            handleFilterChange()
+                        }}
+                        className="max-w-md"
+                    />
+                </div>
+            </div>
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm">
+                    <span className="text-muted-foreground">Sort by:</span>
+                    <Button variant="ghost" size="sm" onClick={() => handleSort("timestamp")} className="h-8 px-2">
+                        Date {getSortIcon("timestamp")}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleSort("user")} className="h-8 px-2">
+                        User {getSortIcon("user")}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleSort("action")} className="h-8 px-2">
+                        Action {getSortIcon("action")}
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleSort("entity")} className="h-8 px-2">
+                        Entity {getSortIcon("entity")}
+                    </Button>
+                </div>
+
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm">
+                            <Filter className="h-4 w-4 mr-2" />
+                            Filters
+                            {hasActiveFilters && (
+                                <Badge
+                                    variant="secondary"
+                                    className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                                >
+                                    !
+                                </Badge>
+                            )}
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80" align="end">
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h4 className="font-medium">Filters</h4>
+                                {hasActiveFilters && (
+                                    <Button variant="ghost" size="sm" onClick={clearFilters}>
+                                        <X className="h-4 w-4 mr-1" />
+                                        Clear
+                                    </Button>
+                                )}
+                            </div>
+
+                            <div className="space-y-3">
+                                <div>
+                                    <Label className="text-sm font-medium">Action Type</Label>
+                                    <Select
+                                        value={actionFilter}
+                                        onValueChange={(value) => {
+                                            setActionFilter(value)
+                                            handleFilterChange()
+                                        }}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">All Actions</SelectItem>
+                                            <SelectItem value="create">Create</SelectItem>
+                                            <SelectItem value="update">Update</SelectItem>
+                                            <SelectItem value="delete">Delete</SelectItem>
+                                            <SelectItem value="upload">Upload</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div>
+                                    <Label className="text-sm font-medium">User</Label>
+                                    <Select
+                                        value={userFilter}
+                                        onValueChange={(value) => {
+                                            setUserFilter(value)
+                                            handleFilterChange()
+                                        }}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {/*<SelectItem value="all">All Users</SelectItem>*/}
+                                            {/*{uniqueUsers.map((user) => (*/}
+                                            {/*    <SelectItem key={user} value={user}>*/}
+                                            {/*        {user}*/}
+                                            {/*    </SelectItem>*/}
+                                            {/*))}*/}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <Label className="text-sm font-medium">From Date</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {dateFrom ? formatMonthDay(dateFrom) : "Select"}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={dateFrom}
+                                                    onSelect={(date) => {
+                                                        setDateFrom(date)
+                                                        handleFilterChange()
+                                                    }}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+
+                                    <div>
+                                        <Label className="text-sm font-medium">To Date</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {dateTo ? formatMonthDay(dateTo) : "Select"}
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={dateTo}
+                                                    onSelect={(date) => {
+                                                        setDateTo(date)
+                                                        handleFilterChange()
+                                                    }}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </PopoverContent>
+                </Popover>
+            </div>
+            {/* Sort Controls */}
+            <Separator className="my-4"/>
+            <div className="flex gap-2 items-center justify-between">
+                <div className="flex gap-2 items-center">
+                    <Select
+                        onValueChange={(value) => {
+                            if (pagination && onPageSizeChange) {
+                                onPageSizeChange(Number(value));
+                            }
+                        }}
+                        defaultValue={String(pagination?.per_page) || '10'}
+                    >
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select page size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="25">25</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
+                    <div className="text-sm text-neutral-500">
+                        {pagination && pagination.total_items > 0 ? (
+                            <>
+                                Showing {startIndex} to {endIndex} of{" "}
+                                {pagination.total_items} results.
+                            </>
+                        ) : (
+                            <>No results.</>
+                        )}
+                    </div>
+                </div>
+                {pagination && (
+                    <div className="flex items-center justify-end space-x-2 py-4">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                onPageChange(pagination.current_page - 1)
+                            }
+                            disabled={pagination.current_page <= 1}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                                onPageChange(pagination.current_page + 1)
+                            }
+                            disabled={
+                                pagination.current_page >= pagination.total_pages
+                            }
+                        >
+                            Next
+                        </Button>
+                    </div>
+                )}
             </div>
             <ScrollArea className="h-[500px] pr-4 mt-4">
                 <div className="flex flex-col gap-2">
@@ -197,44 +446,7 @@ const RoleAuditTrail = () => {
                 </div>
             </ScrollArea>
 
-            <div className="flex justify-between w-full items-center mt-2">
-                <div>
-                    {pagination && pagination.total_items > 0 ? (
-                        <>
-                            Showing {startIndex} to {endIndex} of{" "}
-                            {pagination.total_items} results.
-                        </>
-                    ) : (
-                        <>No results.</>
-                    )}
-                </div>
-                {pagination && (
-                    <div className="flex items-center justify-end space-x-2 py-4">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                                onPageChange(pagination.current_page - 1)
-                            }
-                            disabled={pagination.current_page <= 1}
-                        >
-                            Previous
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                                onPageChange(pagination.current_page + 1)
-                            }
-                            disabled={
-                                pagination.current_page >= pagination.total_pages
-                            }
-                        >
-                            Next
-                        </Button>
-                    </div>
-                )}
-            </div>
+
         </div>
     )
 }
