@@ -1,7 +1,6 @@
 import {useLocation, useNavigate, useParams} from "react-router-dom";
 import {useCallback, useEffect, useMemo, useState} from "react";
 import useGetData from "@/hooks/useGetData.ts";
-import {Permission} from "@/types/permission.ts";
 import {BaseQueryParams} from "@/types/responses.ts";
 import {Role} from "@/types/role.ts";
 import {usePatchData} from "@/hooks/useMutateData.ts";
@@ -10,34 +9,26 @@ import {Check, Loader2} from "lucide-react";
 import {Button} from "@/components/ui/button.tsx";
 import {usePageHeader} from "@/contexts/PageHeaderContext.tsx";
 import {groupPermissionsByCategory} from "@/helpers/groupPermissionsByCategory.ts";
+import useGetAllPermission from "@/features/roles/hooks/useGetAllPermission.ts";
 
 const useRoleDetail = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Determine initial isEditing based on URL path
+    const {
+        permissionsData,
+        isLoadingAllPermissions,
+        isErrorAllPermissions,
+        errorAllPermissions,
+    } = useGetAllPermission();
+
     const initialIsEditingFromPath = location.pathname.endsWith('/edit');
 
     const [isEditing, setIsEditing] = useState(initialIsEditingFromPath);
     const [roleName, setRoleName] = useState("");
     const [roleDescription, setRoleDescription] = useState("");
     const [selectedPermissionIds, setSelectedPermissionIds] = useState<number[]>([]);
-
-    const { data: permissionsData, isLoading: isLoadingAllPermissions, isError: isErrorAllPermissions, error: errorAllPermissions } = useGetData<
-        {items: Permission[], pagination: any},
-        BaseQueryParams
-    >(
-        ["allPermission"],
-        `/app/permissions`,
-        {
-            params: {
-                page: 1,
-                per_page: '1000',
-                include_category_details: true,
-            },
-        },
-    );
 
     const { data: roleData, isLoading, isError, error, refetch: refetchRoleData } = useGetData< // Add refetch
         Role,

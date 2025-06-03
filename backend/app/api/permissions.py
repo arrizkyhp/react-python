@@ -19,6 +19,7 @@ def get_permissions():
     name_search = request.args.get("name_search")
     category_id_filter = request.args.get("category_id", type=int)
     category_name_filter = request.args.get("category_name")
+    get_all = request.args.get("get_all", "false").lower() == "true"
 
     query = Permission.query
     # Apply filters based on query parameters
@@ -32,18 +33,30 @@ def get_permissions():
         # Join with Category table to filter by category name
         query = query.join(Category).filter(Category.name.ilike(f"%{category_name_filter}%"))
 
-    pagination = query.paginate(
-        page=page, per_page=per_page, error_out=False
-    )
-    permissions = pagination.items
-    # Pass the 'include_usage' flag to the to_json method
-    json_permissions = list(map(
-        lambda x: x.to_json(
-            include_usage=include_usage,
-            include_category_details=include_category_details
-        ),
-        permissions
-    ))
+    if get_all:
+        permissions = query.all()
+        json_permissions = list(map(
+            lambda x: x.to_json(
+                include_usage=include_usage,
+                include_category_details=include_category_details
+            ),
+            permissions
+        ))
+        response_data = {"items": json_permissions}  # No pagination metadata
+        response = make_response(jsonify(response_data))
+        return response
+    else:
+        pagination = query.paginate(
+            page=page, per_page=per_page, error_out=False
+        )
+        permissions = pagination.items
+        json_permissions = list(map(
+            lambda x: x.to_json(
+                include_usage=include_usage,
+                include_category_details=include_category_details
+            ),
+            permissions
+        ))
 
     pagination_metadata = {
         "total_items": pagination.total,

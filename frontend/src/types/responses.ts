@@ -4,6 +4,7 @@ export type BaseQueryParams = {
     size?: number;
     per_page?: string;
     status?: string;
+    get_all?: boolean;
     include_usage?: boolean;
     include_category_details?: boolean;
 };

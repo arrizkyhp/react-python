@@ -1,8 +1,5 @@
 import {useNavigate} from "react-router-dom";
 import {useCallback, useMemo, useState} from "react";
-import useGetData from "@/hooks/useGetData.ts";
-import {Permission} from "@/types/permission.ts";
-import {BaseQueryParams} from "@/types/responses.ts";
 import {usePostData} from "@/hooks/useMutateData.ts";
 import {toast} from "sonner";
 import {Check, Loader2} from "lucide-react";
@@ -10,17 +7,22 @@ import {groupPermissionsByCategory} from "@/helpers/groupPermissionsByCategory.t
 import {Button} from "@/components/ui/button.tsx";
 import {usePageHeader} from "@/contexts/PageHeaderContext.tsx";
 import { ENDPOINTS } from "@/constants/apiUrl";
+import useGetAllPermission from "@/features/roles/hooks/useGetAllPermission.ts";
 
 const useRoleCreate = () => {
     const navigate = useNavigate();
     const {
-        PERMISSIONS: {
-            GET: GET_PERMISSIONS,
-        },
         ROLES: {
             GET: GET_ROLES,
         }
     } = ENDPOINTS
+
+    const {
+        permissionsData,
+        isLoadingAllPermissions,
+        isErrorAllPermissions,
+        errorAllPermissions,
+    } = useGetAllPermission();
 
     // States for form fields
     const [roleName, setRoleName] = useState("");
@@ -28,23 +30,6 @@ const useRoleCreate = () => {
     const [selectedPermissionIds, setSelectedPermissionIds] = useState<
         number[]
     >([]);
-
-    const {
-        data: permissionsData,
-        isLoading: isLoadingAllPermissions,
-        isError: isErrorAllPermissions,
-        error: errorAllPermissions,
-    } = useGetData<
-        { items: Permission[]; pagination: any },
-        BaseQueryParams
-    >(["allPermission"],
-        GET_PERMISSIONS,
-        {
-            params: {
-                page: 1,
-                per_page: "1000",
-        },
-    });
 
     const {
         mutate: createRoleMutation,
