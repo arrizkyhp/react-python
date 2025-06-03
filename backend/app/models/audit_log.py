@@ -5,7 +5,7 @@ import json
 class AuditLog(db.Model):
     __tablename__ = "audit_logs"
 
-    id = db.Column(db.BigInteger, primary_key=True)
+    id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     user_id = db.Column(db.BigInteger, db.ForeignKey('users.id'), nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     action_type = db.Column(db.String(50), nullable=False) # e.g., 'CREATE', 'UPDATE', 'DELETE'
