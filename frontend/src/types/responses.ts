@@ -7,6 +7,7 @@ export type BaseQueryParams = {
     get_all?: boolean;
     include_usage?: boolean;
     include_category_details?: boolean;
+    entity_type?: string;
 };
 
 export interface PaginationInfo {

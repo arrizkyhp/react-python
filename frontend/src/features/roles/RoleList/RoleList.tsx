@@ -28,7 +28,7 @@ const RoleList = () => {
     } = useRoleList()
 
     return (
-        <div>
+        <div className="mt-2">
             <DataTable
                 columns={columns}
                 data={data?.items || []}

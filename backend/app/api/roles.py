@@ -141,34 +141,44 @@ def update_role(role_id):
         role.description = new_description
 
     # Handle permission changes (this is the most complex part for auditing)
-    if new_permission_ids is not None: # `permission_ids` was provided in the request body
-        # Get current permission IDs for comparison
-        current_permission_ids = sorted([p.id for p in role.permissions])
-        new_permission_ids_sorted = sorted(list(set(new_permission_ids))) # Ensure unique and sorted
+    if new_permission_ids is not None:
+        current_permissions_info = sorted([
+            {"id": p.id, "name": p.name} for p in role.permissions
+        ], key=lambda x: x['id'])  # Sort for consistent comparison
 
-        if current_permission_ids != new_permission_ids_sorted:
-            try:
-                permissions_to_set = _get_permissions_by_ids(new_permission_ids_sorted)
-            except ValueError as e:
-                return jsonify({"message": str(e)}), 400 # Return 400 for bad request
+        new_permission_ids_set = set(new_permission_ids)  # Use a set for efficient lookup
+        # Fetch new permissions and their names
+        try:
+            permissions_to_set = _get_permissions_by_ids(list(new_permission_ids_set))
+        except ValueError as e:
+            return jsonify({"message": str(e)}), 400
 
-            # Calculate actual permissions added and removed for detailed audit log
+        new_permissions_info = sorted([
+            {"id": p.id, "name": p.name} for p in permissions_to_set
+        ], key=lambda x: x['id'])  # Sort for consistent comparison
+
+        # Only proceed if there are actual changes in the set of permissions
+        if current_permissions_info != new_permissions_info:
+            # Calculate added and removed permissions for description
+            current_permission_ids = {p['id'] for p in current_permissions_info}
+            new_permission_ids_for_compare = {p['id'] for p in new_permissions_info}
+
             added_permissions_names = [
-                p.name for p in permissions_to_set
-                if p.id not in current_permission_ids
+                p['name'] for p in new_permissions_info
+                if p['id'] not in current_permission_ids
             ]
             removed_permissions_names = [
-                p.name for p in role.permissions
-                if p.id not in new_permission_ids_sorted
+                p['name'] for p in current_permissions_info
+                if p['id'] not in new_permission_ids_for_compare
             ]
 
             # Update the role's permissions
-            role.permissions = permissions_to_set # This replaces the entire set of permissions
+            role.permissions = permissions_to_set
 
             # Store permission changes in the `changes` dict for logging
             changes['permissions'] = {
-                'old_ids': current_permission_ids,
-                'new_ids': new_permission_ids_sorted,
+                'old_details': current_permissions_info,  # Store list of dicts
+                'new_details': new_permissions_info,  # Store list of dicts
                 'added_names': added_permissions_names,
                 'removed_names': removed_permissions_names
             }
@@ -192,8 +202,8 @@ def update_role(role_id):
                     entity_type='Role',
                     entity_id=role.id,
                     field_name=field,
-                    old_value=values['old_ids'],
-                    new_value=values['new_ids'],
+                    old_value=values['old_details'],
+                    new_value=values['new_details'],
                     description=description_msg
                 )
             else:
@@ -291,15 +301,19 @@ def add_permission_to_role(role_id):
         return jsonify({"message": "Role already has this permission"}), 409
 
     # Capture old permissions for audit
-    old_permissions_ids = sorted([p.id for p in role.permissions])
-    old_permissions_names = sorted([p.name for p in role.permissions]) # For better description
+    old_permissions_details = sorted([
+        {"id": p.id, "name": p.name} for p in role.permissions
+    ], key=lambda x: x['id'])
 
     role.permissions.append(permission)
     try:
         db.session.commit()
 
         # --- AUDIT LOG: ADD PERMISSION TO ROLE ---
-        new_permissions_ids = sorted([p.id for p in role.permissions])
+        new_permissions_details = sorted([
+            {"id": p.id, "name": p.name} for p in role.permissions
+        ], key=lambda x: x['id'])
+
         description_msg = (
             f"Added permission '{permission.name}' (ID: {permission.id}) "
             f"to role '{role.name}' (ID: {role.id})."
@@ -309,8 +323,8 @@ def add_permission_to_role(role_id):
             entity_type='Role',
             entity_id=role.id,
             field_name='permissions',
-            old_value=old_permissions_ids,
-            new_value=new_permissions_ids,
+            old_value=old_permissions_details,  # Pass the list of dicts
+            new_value=new_permissions_details,  # Pass the list of dicts
             description=description_msg
         )
         # -------------------------------------------
@@ -338,15 +352,19 @@ def remove_permission_from_role(role_id, permission_id):
         return jsonify({"message": "Role does not have this permission"}), 404
 
     # Capture old permissions for audit
-    old_permissions_ids = sorted([p.id for p in role.permissions])
-    old_permissions_names = sorted([p.name for p in role.permissions])
+    old_permissions_details = sorted([
+        {"id": p.id, "name": p.name} for p in role.permissions
+    ], key=lambda x: x['id'])
 
     role.permissions.remove(permission)
     try:
         db.session.commit()
 
         # --- AUDIT LOG: REMOVE PERMISSION FROM ROLE ---
-        new_permissions_ids = sorted([p.id for p in role.permissions])
+        new_permissions_details = sorted([
+            {"id": p.id, "name": p.name} for p in role.permissions
+        ], key=lambda x: x['id'])
+
         description_msg = (
             f"Removed permission '{permission.name}' (ID: {permission.id}) "
             f"from role '{role.name}' (ID: {role.id})."
@@ -356,8 +374,8 @@ def remove_permission_from_role(role_id, permission_id):
             entity_type='Role',
             entity_id=role.id,
             field_name='permissions',
-            old_value=old_permissions_ids,
-            new_value=new_permissions_ids,
+            old_value=old_permissions_details,  # Pass the list of dicts
+            new_value=new_permissions_details,  # Pass the list of dicts
             description=description_msg
         )
         # ----------------------------------------------

@@ -20,5 +20,8 @@ export const ENDPOINTS = {
         CREATE: '/app/contacts',
         UPDATE: (id: string) => `/app/contacts/${id}`,
         DELETE: (id: string) => `/app/contacts/${id}`,
+    },
+    AUDIT_TRAIL: {
+        GET: '/app/audit-logs',
     }
 }

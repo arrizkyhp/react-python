@@ -1,12 +1,10 @@
 import useQueryParams from "@/hooks/useQueryParams.ts";
 import {useNavigate} from "react-router-dom";
-import {useMemo, useState} from "react";
+import {useState} from "react";
 import useGetData from "@/hooks/useGetData.ts";
 import {BaseQueryParams, ListResponse} from "@/types/responses.ts";
 import {Role} from "@/types/role.ts";
 import createQueryParams from "@/utils/createQueryParams.ts";
-import {Button} from "@/components/ui/button.tsx";
-import {usePageHeader} from "@/contexts/PageHeaderContext.tsx";
 import {useDeleteData} from "@/hooks/useMutateData.ts";
 import {toast} from "sonner";
 import {Check} from "lucide-react";
@@ -36,26 +34,6 @@ const useRoleList = () => {
             },
         }
     )
-
-    const handleCreateRole = () => {
-        navigate("/roles/create");
-    }
-
-    const userHeaderConfig = useMemo(() => ({
-            title: "Role List",
-            breadcrumbs: [{ label: "Role List" }],
-            showBackButton: false,
-            actions: (
-                <Button
-                    className="bg-green-600 hover:bg-green-700"
-                onClick={handleCreateRole}
-                >
-                    Create Role
-                </Button>
-            )
-    }), []);
-
-    usePageHeader(userHeaderConfig);
 
     const {
         mutate: deleteRoleMutation,
