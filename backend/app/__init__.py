@@ -28,6 +28,7 @@ def register_blueprints(app_instance): # Pass the app instance
     from .api.roles import roles_bp
     from .api.permissions import permissions_bp
     from .api.categories import categories_bp
+    from .api.audit_logs import audit_logs_bp
 
     app_instance.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
     app_instance.register_blueprint(contacts_bp, url_prefix="/api/app")
@@ -35,4 +36,5 @@ def register_blueprints(app_instance): # Pass the app instance
     app_instance.register_blueprint(roles_bp, url_prefix="/api/app")
     app_instance.register_blueprint(permissions_bp, url_prefix="/api/app")
     app_instance.register_blueprint(categories_bp, url_prefix="/api/app")
+    app_instance.register_blueprint(audit_logs_bp, url_prefix="/api/app")
     app_instance.register_blueprint(auth_bp, url_prefix="/api/auth") # Auth routes

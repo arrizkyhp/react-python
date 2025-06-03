@@ -32,7 +32,6 @@ class Permission(db.Model):
             "id": self.id,
             "name": self.name,
             "description": self.description,
-            # category_id instead of string category
             "category_id": self.category_id,
             "status": self.status
         }

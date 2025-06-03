@@ -1,8 +1,9 @@
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request, jsonify, make_response, current_app
 from ..config import db
 from ..models import Category, Permission # Import Category and Permission
 from ..decorators import permission_required
 from flask_login import login_required
+from ..utils.audit_logger import log_audit_event
 
 categories_bp = Blueprint('categories', __name__)
 
@@ -91,8 +92,18 @@ def create_category():
     try:
         db.session.add(new_category)
         db.session.commit()
+
+        log_audit_event(
+            action_type='CREATE',
+            entity_type='Category',
+            entity_id=new_category.id,
+            new_value=new_category.to_json(),  # Log the full new object state
+            description=f"Created category '{new_category.name}' (ID: {new_category.id})"
+        )
+
     except Exception as e:
         db.session.rollback()
+        current_app.logger.error(f"Failed to create category: {e}", exc_info=True)
         return jsonify({"message": f"Failed to create category: {str(e)}"}), 400
 
     return jsonify({"message": "Category created successfully!", "category": new_category.to_json()}), 201
@@ -105,33 +116,53 @@ def update_category(category_id):
     if not category:
         return jsonify({"message": "Category not found"}), 404
 
+    # Capture old state for audit logging before making any changes
+    old_category_data = category.to_json()
+    changes = {}  # Dictionary to track what changed for audit log
+
     data = request.json
     new_name = data.get("name")
     new_description = data.get("description")
     new_status = data.get("status")
 
-    if new_name and new_name != category.name:
+    if new_name is not None and new_name != category.name:
         existing_category = Category.query.filter(
             Category.name == new_name,
             Category.id != category_id
         ).first()
         if existing_category:
             return jsonify({"message": f"Category '{new_name}' already exists"}), 409
+        changes['name'] = {'old': category.name, 'new': new_name}
+        category.name = new_name
 
-    if new_status is not None:
+    if new_description is not None and new_description != category.description:
+        changes['description'] = {'old': category.description, 'new': new_description}
+        category.description = new_description
+
+    if new_status is not None and new_status != category.status:
         if new_status not in ['active', 'inactive']:
             return jsonify({"message": "Invalid status. Must be 'active' or 'inactive'"}), 400
+        changes['status'] = {'old': category.status, 'new': new_status}
         category.status = new_status
 
-    if new_name:
-        category.name = new_name
-    if new_description is not None:
-        category.description = new_description
+    if not changes:  # No actual changes were made
+        return jsonify({"message": "No changes provided for update."}), 200
 
     try:
         db.session.commit()
+        for field, values in changes.items():
+            log_audit_event(
+                action_type='UPDATE',
+                entity_type='Category',
+                entity_id=category.id,
+                field_name=field,
+                old_value=values['old'],
+                new_value=values['new'],
+                description=f"Updated category '{category.name}' (ID: {category.id}): changed '{field}'"
+            )
     except Exception as e:
         db.session.rollback()
+        current_app.logger.error(f"Failed to update category: {e}", exc_info=True)
         return jsonify({"message": f"Failed to update category: {str(e)}"}), 400
 
     return jsonify({"message": "Category updated successfully!", "category": category.to_json()}), 200
@@ -149,11 +180,25 @@ def delete_category(category_id):
             {"message": f"Cannot delete category '{category.name}'. It is associated with {category.permissions.count()} permissions. Please reassign or delete these permissions first."}
         ), 409
 
+    # Capture category data before deletion for audit log
+    deleted_category_name = category.name
+    deleted_category_json = category.to_json()
+
     try:
         db.session.delete(category)
         db.session.commit()
+
+        log_audit_event(
+            action_type='DELETE',
+            entity_type='Category',
+            entity_id=category_id,  # Use the ID of the deleted category
+            old_value=deleted_category_json,  # Log the state before deletion
+            description=f"Deleted category '{deleted_category_name}' (ID: {category_id})"
+        )
+
     except Exception as e:
         db.session.rollback()
+        current_app.logger.error(f"Failed to delete category: {e}", exc_info=True)
         return jsonify({"message": f"Failed to delete category: {str(e)}"}), 400
 
     return jsonify({"message": "Category deleted successfully!"}), 200

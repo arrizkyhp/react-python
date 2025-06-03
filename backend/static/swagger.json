@@ -29,6 +29,10 @@
     {
       "name": "Category Management",
       "description": "Operations for managing permission categories (Admin/Permission Required)"
+    },
+    {
+      "name": "Audit Logs",
+      "description": "System audit trail records (Authentication Required, specific permission required)"
     }
   ],
   "securityDefinitions": {
@@ -168,6 +172,92 @@
           "401": { "$ref": "#/responses/UnauthorizedError" },
           "403": { "$ref": "#/responses/ForbiddenError" },
           "404": { "$ref": "#/responses/NotFoundError" }
+        }
+      }
+    },
+    "/app/audit-logs": {
+      "get": {
+        "summary": "Retrieve a paginated list of system audit logs.",
+        "tags": ["Audit Logs"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "description": "Page number for pagination.",
+            "default": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of items per page.",
+            "default": 10
+          },
+          {
+            "name": "entity_type",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by the type of entity involved (e.g., 'Category', 'Permission'). Case-insensitive partial match."
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "type": "integer",
+            "description": "Filter by the specific ID of the entity involved."
+          },
+          {
+            "name": "action_type",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by the type of action performed (e.g., 'CREATE', 'UPDATE', 'DELETE'). Case-insensitive partial match."
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "type": "integer",
+            "description": "Filter by the ID of the user who performed the action."
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string",
+            "description": "General search query across username, description, entity type, and field name (case-insensitive)."
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "type": "string",
+            "enum": ["timestamp", "user", "action", "entity"],
+            "description": "Field to sort the audit logs by.",
+            "default": "timestamp"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "type": "string",
+            "enum": ["asc", "desc"],
+            "description": "Order of sorting (ascending or descending).",
+            "default": "desc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of audit logs and pagination information.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/AuditLog" }
+                },
+                "pagination": { "$ref": "#/definitions/Pagination" }
+              }
+            }
+          },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" }
         }
       }
     },
@@ -1439,6 +1529,73 @@
       "type": "object",
       "properties": {
         "message": { "type": "string" }
+      }
+    },
+    "AuditLog": {
+      "type": "object",
+      "description": "Represents a single audit log entry detailing an action performed by a user.",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "The unique identifier of the audit log entry."
+        },
+        "user_id": {
+          "type": "integer",
+          "description": "The ID of the user who performed the action."
+        },
+        "username": {
+          "type": "string",
+          "description": "The username of the user who performed the action. (Fetched from User model)."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the action occurred."
+        },
+        "action_type": {
+          "type": "string",
+          "description": "The type of action performed (e.g., CREATE, UPDATE, DELETE, LOGIN)."
+        },
+        "entity_type": {
+          "type": "string",
+          "description": "The type of entity affected (e.g., 'User', 'Role', 'Permission', 'Contact')."
+        },
+        "entity_id": {
+          "type": "integer",
+          "description": "The ID of the entity affected by the action.",
+          "x-nullable": true
+        },
+        "description": {
+          "type": "string",
+          "description": "A human-readable description of the action.",
+          "x-nullable": true
+        },
+        "field_name": {
+          "type": "string",
+          "description": "The specific field name that was changed (for UPDATE actions).",
+          "x-nullable": true
+        },
+        "old_value": {
+          "type": "string",
+          "description": "The value of the field before the change (for UPDATE actions). This might be JSON stringified for complex types.",
+          "x-nullable": true
+        },
+        "new_value": {
+          "type": "string",
+          "description": "The value of the field after the change (for UPDATE actions). This might be JSON stringified for complex types.",
+          "x-nullable": true
+        },
+        "ip_address": {
+          "type": "string",
+          "format": "ipv4",
+          "description": "The IP address from which the action originated.",
+          "x-nullable": true
+        },
+        "user_agent": {
+          "type": "string",
+          "description": "The user agent string of the client that performed the action.",
+          "x-nullable": true
+        }
       }
     }
   },

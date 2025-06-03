@@ -25,7 +25,8 @@ with app.app_context():
         ('Contact Management', 'Permissions related to managing contacts.'),
         ('Role Management', 'Permissions related to managing user roles.'),
         ('Permission Management', 'Permissions related to managing system permissions.'),
-        ('Category Management', 'Permissions related to managing permission categories.'), # New category
+        ('Category Management', 'Permissions related to managing permission categories.'),
+        ('Audit Management', 'Permissions related to viewing and managing audit logs.'),
     ]
 
     # --- Create Categories ---
@@ -70,6 +71,7 @@ with app.app_context():
         ('category.create', 'Can create new permission categories.', 'Category Management', 'active'),
         ('category.update', 'Can update existing permission categories.', 'Category Management', 'active'),
         ('category.delete', 'Can delete permission categories.', 'Category Management', 'active'),
+        ('audit.read.all', 'Can view all audit logs.', 'Audit Management', 'active'),
     ]
 
     # --- Create Permissions ---
