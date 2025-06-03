@@ -6,7 +6,7 @@ export const groupPermissionsByCategory = (
     const grouped: Record<string, Permission[]> = {};
 
     permissions.forEach((permission) => {
-        const categoryName = permission.category || "Uncategorized";
+        const categoryName = permission.category?.name || "Uncategorized";
 
         if (!grouped[categoryName]) {
             grouped[categoryName] = [];

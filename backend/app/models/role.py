@@ -26,12 +26,17 @@ class Role(db.Model):
         """Check if this role has a specific permission."""
         return any(permission.name == permission_name for permission in self.permissions)
 
-    def to_json(self):
+    def to_json(self, include_permission_category_details=True):
+        current_permissions = self.permissions.all() if hasattr(self.permissions, 'all') else self.permissions
+
         return {
             "id": self.id,
             "name": self.name,
             "description": self.description,
-            "permissions": [p.to_json() for p in (self.permissions.all() if hasattr(self.permissions, 'all') else self.permissions)] # Handle both dynamic and non-dynamic relationships
+            "permissions": [
+                p.to_json(include_category_details=include_permission_category_details)
+                for p in current_permissions
+            ]
         }
 
     def __repr__(self):

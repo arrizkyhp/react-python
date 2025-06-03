@@ -3,9 +3,15 @@ export interface AffectedRoles {
     name: string;
 }
 
+export interface Category {
+    id: number;
+    name: string;
+    description: string;
+}
+
 export interface Permission {
     id: number;
-    category: string;
+    category: Category;
     description: string;
     name: string;
     status?: string;

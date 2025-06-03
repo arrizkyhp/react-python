@@ -34,6 +34,7 @@ const useRoleDetail = () => {
             params: {
                 page: 1,
                 per_page: '1000',
+                include_category_details: true,
             },
         },
     );
@@ -188,6 +189,8 @@ const useRoleDetail = () => {
     }), [handleSaveClick, isEditing]);
 
     usePageHeader(userHeaderConfig);
+
+    console.log({permissionsData})
 
     const allGroupedPermissions = permissionsData?.items ? groupPermissionsByCategory(permissionsData.items) : {};
 

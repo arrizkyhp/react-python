@@ -5,6 +5,7 @@ export type BaseQueryParams = {
     per_page?: string;
     status?: string;
     include_usage?: boolean;
+    include_category_details?: boolean;
 };
 
 export interface PaginationInfo {

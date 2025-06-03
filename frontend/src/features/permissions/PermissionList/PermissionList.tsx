@@ -23,7 +23,11 @@ const PermissionList = () => {
 
     const [selectedPermissions, setSelectedPermissions] = useState<Permission>({
         id: 0,
-        category: "",
+        category: {
+            id: 0,
+            name: "",
+            description: "",
+        },
         description: "",
         name: "",
         status: "",
@@ -42,6 +46,7 @@ const PermissionList = () => {
                 per_page: queryParams.per_page || '10',
                 status: queryParams.status,
                 include_usage: queryParams.include_usage ?? true,
+                include_category_details: true,
             },
         }
     )

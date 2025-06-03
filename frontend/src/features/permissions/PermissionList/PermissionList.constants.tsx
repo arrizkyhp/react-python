@@ -1,6 +1,6 @@
 import {ColumnDef} from "@tanstack/react-table";
 import {Badge} from "@/components/ui/badge.tsx";
-import {Permission} from "@/types/permission.ts";
+import {Category, Permission} from "@/types/permission.ts";
 import { Users} from "lucide-react";
 
 export const columns: ColumnDef<Permission>[] = [
@@ -17,6 +17,10 @@ export const columns: ColumnDef<Permission>[] = [
     {
         accessorKey: "category",
         header: () => <div className="text-left">Category</div>,
+        cell: ({ row }) => {
+            const category = row.getValue("category") as Category;
+            return <p className="font-fira-code">{category.name || ""}</p>;
+        }
     },
     {
         accessorKey: "description",

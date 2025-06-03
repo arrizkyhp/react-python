@@ -22,6 +22,8 @@ const PermissionDetail = (props: PermissionDetailProps) => {
         usage,
         affected_roles = []
     } = data || {}
+
+    const { name: categoryName } = category || {}
     const isActive = status === "active";
 
     const statusRender = (
@@ -46,7 +48,7 @@ const PermissionDetail = (props: PermissionDetailProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                     <div className="flex flex-col gap-1">
                         <Label htmlFor="roleName">Category</Label>
-                        <p className="text-sm">{category}</p>
+                        <p className="text-sm">{categoryName}</p>
                     </div>
                     <div className="flex flex-col gap-1">
                         <Label htmlFor="roleName">Status</Label>

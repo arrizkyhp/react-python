@@ -28,6 +28,8 @@ const RoleDetail = () => {
        togglePermission
    } = useRoleDetail()
 
+    console.log({allGroupedPermissions})
+
     if (!id) {
         return (
             <Alert variant="destructive">
