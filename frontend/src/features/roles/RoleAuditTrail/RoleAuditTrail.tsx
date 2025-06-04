@@ -40,7 +40,8 @@ const RoleAuditTrail = () => {
         onPageSizeChange,
         onSearchChange,
         onSortChange,
-        onActionTypeChange
+        onActionTypeChange,
+        clearAllParams
     } = useQueryParams()
 
     const [actionFilter, setActionFilter] = useState<string>("all")
@@ -81,7 +82,7 @@ const RoleAuditTrail = () => {
             case "UPDATE":
                 return "bg-blue-500 hover:bg-blue-500/80"; // Using Tailwind CSS classes for blue
             default:
-                return ""; // Default or no specific color
+                return "";
         }
     };
 
@@ -189,10 +190,7 @@ const RoleAuditTrail = () => {
         setUserFilter("all")
         setDateFrom(undefined)
         setDateTo(undefined)
-        onPageChange(1)
-        onSearchChange("")
-        onActionTypeChange("all");
-        onSortChange("timestamp", "desc");
+        clearAllParams()
     }
 
     return (

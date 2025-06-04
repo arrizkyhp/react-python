@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import createQueryParams from "@/utils/createQueryParams.ts";
 import {BaseQueryParams} from "@/types/responses.ts";
 import {useLocation, useNavigate } from "react-router-dom";
@@ -12,18 +12,41 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
     const { replaceURL = true } = options || {};
     const navigate = useNavigate();
     const location = useLocation();
-    const [queryParams, setQueryParams] = useState<BaseQueryParams>({
-        search: '',
-        page: 1,
-        per_page: 10,
-    });
 
-    const updateQueryParams = (queryObject: Partial<BaseQueryParams>) => { // Use Partial for partial updates
-        const newQueryParams = { ...queryParams, ...queryObject } as BaseQueryParams; // Merge and cast
+    const getInitialParams = (): BaseQueryParams => {
+        const searchParams = new URLSearchParams(location.search);
+        return {
+            search: searchParams.get('search') || '',
+            page: parseInt(searchParams.get('page') || '1'),
+            per_page: parseInt(searchParams.get('per_page') || '10'),
+            sort_by: searchParams.get('sort_by') as SortFieldAudit || undefined,
+            sort_order: searchParams.get('sort_order') as SortDirection || undefined,
+            action_type: searchParams.get('action_type') || undefined,
+        };
+    };
+
+    const [queryParams, setQueryParams] = useState<BaseQueryParams>(getInitialParams);
+
+    useEffect(() => {
+        const newParams = getInitialParams();
+        setQueryParams(newParams);
+    }, [location.search]);
+
+    const updateQueryParams = (queryObject: Partial<BaseQueryParams>) => {
+        const newQueryParams = { ...queryParams, ...queryObject } as BaseQueryParams;
         setQueryParams(newQueryParams);
+
         if (replaceURL) {
-            // Use navigate for replacement, constructing the URL with location.pathname
-            navigate(`${location.pathname}?${createQueryParams(newQueryParams)}`, { replace: true, state: location.state });
+            // Clean undefined values before creating query string
+            const cleanParams = Object.fromEntries(
+                Object.entries(newQueryParams).filter(([_, value]) =>
+                    value !== undefined && value !== null && value !== ''
+                )
+            );
+            navigate(`${location.pathname}?${createQueryParams(cleanParams)}`, {
+                replace: true,
+                state: location.state
+            });
         }
     };
 
@@ -42,17 +65,31 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
     const onSortChange = (field: SortFieldAudit, direction: SortDirection) => {
         updateQueryParams({
             ...queryParams,
-            page: 1, // Reset to first page on sort change
+            page: 1,
             sort_by: field,
             sort_order: direction,
         });
     };
 
     const onActionTypeChange = (actionType: string) => {
+        console.log({actionType});
         updateQueryParams({
-            action_type: actionType === "all" ? undefined : actionType, // Set to undefined if "all"
-            page: 1, // Reset to first page on filter change
+            action_type: actionType === "all" ? undefined : actionType,
+            page: 1,
         });
+    };
+
+    // New method to clear all params at once
+    const clearAllParams = () => {
+        const clearedParams: BaseQueryParams = {
+            search: undefined,
+            page: 1,
+            per_page: 10,
+            sort_by: 'timestamp',
+            sort_order: 'desc',
+            action_type: undefined,
+        };
+        updateQueryParams(clearedParams);
     };
 
     return {
@@ -61,7 +98,8 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
         onSearchChange,
         onActionTypeChange,
         queryParams,
-        onSortChange
+        onSortChange,
+        clearAllParams
     }
 }
 
