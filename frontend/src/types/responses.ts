@@ -5,6 +5,7 @@ export type BaseQueryParams = {
     per_page?: number;
     sort_by?: string;
     sort_order?: string;
+    action_type?: string;
     status?: string;
     get_all?: boolean;
     include_usage?: boolean;

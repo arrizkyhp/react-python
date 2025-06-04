@@ -39,7 +39,8 @@ const RoleAuditTrail = () => {
         onPageChange,
         onPageSizeChange,
         onSearchChange,
-        onSortChange
+        onSortChange,
+        onActionTypeChange
     } = useQueryParams()
 
     const [actionFilter, setActionFilter] = useState<string>("all")
@@ -64,6 +65,7 @@ const RoleAuditTrail = () => {
                 search: queryParams.search,
                 sort_by: queryParams.sort_by,
                 sort_order: queryParams.sort_order,
+                action_type: queryParams.action_type
             }
         }
     )
@@ -173,6 +175,11 @@ const RoleAuditTrail = () => {
         onPageChange(1)
     }
 
+    const handleActionFilterChange = (value: string) => {
+        setActionFilter(value); // Update local state for immediate feedback
+        onActionTypeChange(value); // Update URL via hook
+    };
+
     const hasActiveFilters = searchQuery || actionFilter !== "all" || userFilter !== "all" || dateFrom || dateTo
 
 
@@ -184,6 +191,7 @@ const RoleAuditTrail = () => {
         setDateTo(undefined)
         onPageChange(1)
         onSearchChange("")
+        onActionTypeChange("all");
         onSortChange("timestamp", "desc");
     }
 
@@ -257,8 +265,7 @@ const RoleAuditTrail = () => {
                                     <Select
                                         value={actionFilter}
                                         onValueChange={(value) => {
-                                            setActionFilter(value)
-                                            handleFilterChange()
+                                            handleActionFilterChange(value)
                                         }}
                                     >
                                         <SelectTrigger className="w-full">

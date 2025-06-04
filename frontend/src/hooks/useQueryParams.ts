@@ -48,10 +48,18 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
         });
     };
 
+    const onActionTypeChange = (actionType: string) => {
+        updateQueryParams({
+            action_type: actionType === "all" ? undefined : actionType, // Set to undefined if "all"
+            page: 1, // Reset to first page on filter change
+        });
+    };
+
     return {
         onPageChange,
         onPageSizeChange,
         onSearchChange,
+        onActionTypeChange,
         queryParams,
         onSortChange
     }
