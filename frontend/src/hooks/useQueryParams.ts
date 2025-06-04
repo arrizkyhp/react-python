@@ -2,6 +2,7 @@ import { useState } from "react";
 import createQueryParams from "@/utils/createQueryParams.ts";
 import {BaseQueryParams} from "@/types/responses.ts";
 import {useLocation, useNavigate } from "react-router-dom";
+import {SortDirection, SortFieldAudit} from "@/types/sort.ts";
 
 interface QueryParamsOptions {
     replaceURL?: boolean;
@@ -38,11 +39,21 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
         updateQueryParams({ ...queryParams, search: val, page: 1 });
     };
 
+    const onSortChange = (field: SortFieldAudit, direction: SortDirection) => {
+        updateQueryParams({
+            ...queryParams,
+            page: 1, // Reset to first page on sort change
+            sort_by: field,
+            sort_order: direction,
+        });
+    };
+
     return {
         onPageChange,
         onPageSizeChange,
         onSearchChange,
-        queryParams
+        queryParams,
+        onSortChange
     }
 }
 

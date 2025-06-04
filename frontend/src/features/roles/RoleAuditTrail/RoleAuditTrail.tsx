@@ -38,11 +38,10 @@ const RoleAuditTrail = () => {
         queryParams,
         onPageChange,
         onPageSizeChange,
-        onSearchChange
+        onSearchChange,
+        onSortChange
     } = useQueryParams()
 
-    const [sortField, setSortField] = useState<SortFieldAudit>("timestamp")
-    const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
     const [actionFilter, setActionFilter] = useState<string>("all")
     const [userFilter, setUserFilter] = useState<string>("all")
     const [dateFrom, setDateFrom] = useState<Date | undefined>()
@@ -63,6 +62,8 @@ const RoleAuditTrail = () => {
                 page: queryParams.page,
                 per_page: queryParams.per_page || 10,
                 search: queryParams.search,
+                sort_by: queryParams.sort_by,
+                sort_order: queryParams.sort_order,
             }
         }
     )
@@ -147,18 +148,26 @@ const RoleAuditTrail = () => {
         : 0;
 
     const getSortIcon = (field: SortFieldAudit) => {
-        if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />
-        return sortDirection === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />
-    }
+        if (queryParams.sort_by !== field) return <ArrowUpDown className="h-4 w-4" />;
+        return queryParams.sort_order === "asc" ? (
+            <ArrowUp className="h-4 w-4" />
+        ) : (
+            <ArrowDown className="h-4 w-4" />
+        );
+    };
 
     const handleSort = (field: SortFieldAudit) => {
-        if (sortField === field) {
-            setSortDirection(sortDirection === "asc" ? "desc" : "asc")
-        } else {
-            setSortField(field)
-            setSortDirection("desc")
-        }
-    }
+        // Get current sort direction for the clicked field
+        const currentSortDirection =
+            queryParams.sort_by === field ? queryParams.sort_order : "desc"; // Default to desc if new field
+
+        // Determine the new sort direction
+        const newSortDirection: SortDirection =
+            currentSortDirection === "asc" ? "desc" : "asc";
+
+        // Call onSortChange from the hook
+        onSortChange(field, newSortDirection);
+    };
 
     const handleFilterChange = () => {
         onPageChange(1)
@@ -175,10 +184,8 @@ const RoleAuditTrail = () => {
         setDateTo(undefined)
         onPageChange(1)
         onSearchChange("")
+        onSortChange("timestamp", "desc");
     }
-
-    console.log(queryParams)
-
 
     return (
         <div className="mt-2">

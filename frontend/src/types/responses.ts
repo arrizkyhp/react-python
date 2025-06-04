@@ -3,6 +3,8 @@ export type BaseQueryParams = {
     page?: number;
     size?: number;
     per_page?: number;
+    sort_by?: string;
+    sort_order?: string;
     status?: string;
     get_all?: boolean;
     include_usage?: boolean;
