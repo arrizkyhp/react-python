@@ -11,35 +11,58 @@ users_bp = Blueprint('users', __name__)
 @users_bp.route("/users", methods=["GET"], strict_slashes=False)
 @login_required
 def get_users():
-
+    get_all = request.args.get("get_all", "false").lower() == "true"
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
+    status_filter = request.args.get("status")  # Added status filter
+    username_search = request.args.get("username_search")  # Added username search
+    email_search = request.args.get("email_search")  # Added email search
+    role_id_filter = request.args.get("role_id", type=int)  # Filter by role ID
+    role_name_filter = request.args.get("role_name")  # Filter by role name
 
-    pagination = User.query.paginate(
-        page=page, per_page=per_page, error_out=False
-    )
+    query = User.query
 
-    users = pagination.items
-    json_users = list(map(lambda x: x.to_json(), users))
+    # Apply filters based on query parameters
+    if status_filter:
+        query = query.filter_by(status=status_filter)  # Assuming a 'status' field in User model
+    if username_search:
+        query = query.filter(User.username.ilike(f"%{username_search}%"))
+    if email_search:
+        query = query.filter(User.email.ilike(f"%{email_search}%"))
+    if role_id_filter:
+        query = query.filter(User.roles.any(Role.id == role_id_filter))
+    if role_name_filter:
+        query = query.filter(User.roles.any(Role.name.ilike(f"%{role_name_filter}%")))
 
-    pagination_metadata = {
-        "total_items": pagination.total,
-        "total_pages": pagination.pages,
-        "current_page": pagination.page,
-        "per_page": pagination.per_page,
-        "has_next": pagination.has_next,
-        "has_prev": pagination.has_prev,
-        "next_num": pagination.next_num,
-        "prev_num": pagination.prev_num,
-    }
+    if get_all:
+        users = query.all()
+        json_users = list(map(lambda x: x.to_json(), users))
+        response_data = {"items": json_users}
+        response = make_response(jsonify(response_data))
+        return response
+    else:
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
-    response_data = OrderedDict([
-        ("items", json_users),
-        ("pagination", pagination_metadata)
-    ])
-    response = make_response(jsonify(response_data))
+        users = pagination.items
+        json_users = list(map(lambda x: x.to_json(), users))
 
-    return response
+        pagination_metadata = {
+            "total_items": pagination.total,
+            "total_pages": pagination.pages,
+            "current_page": pagination.page,
+            "per_page": pagination.per_page,
+            "has_next": pagination.has_next,
+            "has_prev": pagination.has_prev,
+            "next_num": pagination.next_num,
+            "prev_num": pagination.prev_num,
+        }
+
+        response_data = OrderedDict(
+            [("items", json_users), ("pagination", pagination_metadata)]
+        )
+        response = make_response(jsonify(response_data))
+
+        return response
 
 
 @users_bp.route("/users/<int:user_id>", methods=["PATCH"])

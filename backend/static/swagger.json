@@ -372,20 +372,58 @@
             "name": "page",
             "in": "query",
             "type": "integer",
-            "description": "Page number for pagination.",
+            "description": "Page number for pagination. Ignored if `get_all` is true.",
             "default": 1
           },
           {
             "name": "per_page",
             "in": "query",
             "type": "integer",
-            "description": "Number of items per page.",
+            "description": "Number of items per page. Ignored if `get_all` is true.",
             "default": 10
+          },
+          {
+            "name": "get_all",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, returns all users, ignoring 'page' and 'per_page' parameters. Use with caution for very large datasets.",
+            "default": false
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "enum": ["active", "inactive", "pending", "locked"],
+            "description": "Filter users by their status. Applied even if `get_all` is true."
+          },
+          {
+            "name": "username_search",
+            "in": "query",
+            "type": "string",
+            "description": "Search users by partial username match (case-insensitive). Applied even if `get_all` is true."
+          },
+          {
+            "name": "email_search",
+            "in": "query",
+            "type": "string",
+            "description": "Search users by partial email match (case-insensitive). Applied even if `get_all` is true."
+          },
+          {
+            "name": "role_id",
+            "in": "query",
+            "type": "integer",
+            "description": "Filter users who are assigned to a specific role ID. Applied even if `get_all` is true."
+          },
+          {
+            "name": "role_name",
+            "in": "query",
+            "type": "string",
+            "description": "Filter users who are assigned to a role with a specific partial name match (case-insensitive). Applied even if `get_all` is true."
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of users and pagination information.",
+            "description": "A list of users. If `get_all` is true, pagination metadata might be omitted.",
             "schema": {
               "type": "object",
               "properties": {
@@ -393,7 +431,10 @@
                   "type": "array",
                   "items": { "$ref": "#/definitions/User" }
                 },
-                "pagination": { "$ref": "#/definitions/Pagination" }
+                "pagination": {
+                  "$ref": "#/definitions/Pagination",
+                  "description": "Omitted if `get_all` is true."
+                }
               }
             }
           },
@@ -776,124 +817,124 @@
       }
     },
     "/app/permissions": {
-  "get": {
-    "summary": "Get a list of permissions.",
-    "tags": ["Permission Management"],
-    "security": [{ "cookieAuth": [] }],
-    "parameters": [
-      {
-        "name": "page",
-        "in": "query",
-        "type": "integer",
-        "description": "Page number for pagination. Ignored if `get_all` is true.",
-        "default": 1
-      },
-      {
-        "name": "per_page",
-        "in": "query",
-        "type": "integer",
-        "description": "Number of items per page. Ignored if `get_all` is true.",
-        "default": 10
-      },
-      {
-        "name": "get_all",
-        "in": "query",
-        "type": "boolean",
-        "description": "If true, returns all permissions, ignoring 'page' and 'per_page' parameters. Use with caution for very large datasets.",
-        "default": false
-      },
-      {
-        "name": "include_usage",
-        "in": "query",
-        "type": "boolean",
-        "description": "If true, includes usage statistics (number of roles and affected role names) for each permission.",
-        "default": false
-      },
-      {
-        "name": "include_category_details",
-        "in": "query",
-        "type": "boolean",
-        "description": "If true, includes the full category object for each permission.",
-        "default": false
-      },
-      {
-        "name": "status",
-        "in": "query",
-        "type": "string",
-        "enum": ["active", "inactive"],
-        "description": "Filter permissions by their status. Applied even if `get_all` is true."
-      },
-      {
-        "name": "name_search",
-        "in": "query",
-        "type": "string",
-        "description": "Search permissions by partial name match (case-insensitive). Applied even if `get_all` is true."
-      },
-      {
-        "name": "category_id",
-        "in": "query",
-        "type": "integer",
-        "description": "Filter permissions by their category ID. Applied even if `get_all` is true."
-      },
-      {
-        "name": "category_name",
-        "in": "query",
-        "type": "string",
-        "description": "Search permissions by partial category name match (case-insensitive). Applied even if `get_all` is true.",
-        "example": "User"
-      }
-    ],
-    "responses": {
-      "200": {
-        "description": "A list of permissions. If `get_all` is true, pagination metadata might be omitted.",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "items": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/Permission" }
-            },
-            "pagination": {
-              "$ref": "#/definitions/Pagination",
-              "description": "Omitted if `get_all` is true."
+      "get": {
+        "summary": "Get a list of permissions.",
+        "tags": ["Permission Management"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "description": "Page number for pagination. Ignored if `get_all` is true.",
+            "default": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of items per page. Ignored if `get_all` is true.",
+            "default": 10
+          },
+          {
+            "name": "get_all",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, returns all permissions, ignoring 'page' and 'per_page' parameters. Use with caution for very large datasets.",
+            "default": false
+          },
+          {
+            "name": "include_usage",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, includes usage statistics (number of roles and affected role names) for each permission.",
+            "default": false
+          },
+          {
+            "name": "include_category_details",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, includes the full category object for each permission.",
+            "default": false
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "type": "string",
+            "enum": ["active", "inactive"],
+            "description": "Filter permissions by their status. Applied even if `get_all` is true."
+          },
+          {
+            "name": "name_search",
+            "in": "query",
+            "type": "string",
+            "description": "Search permissions by partial name match (case-insensitive). Applied even if `get_all` is true."
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "type": "integer",
+            "description": "Filter permissions by their category ID. Applied even if `get_all` is true."
+          },
+          {
+            "name": "category_name",
+            "in": "query",
+            "type": "string",
+            "description": "Search permissions by partial category name match (case-insensitive). Applied even if `get_all` is true.",
+            "example": "User"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of permissions. If `get_all` is true, pagination metadata might be omitted.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/Permission" }
+                },
+                "pagination": {
+                  "$ref": "#/definitions/Pagination",
+                  "description": "Omitted if `get_all` is true."
+                }
+              }
             }
-          }
+          },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" }
         }
       },
-      "401": { "$ref": "#/responses/UnauthorizedError" },
-      "403": { "$ref": "#/responses/ForbiddenError" }
-    }
-  },
-  "post": {
-    "summary": "Create a new permission.",
-    "tags": ["Permission Management"],
-    "security": [{ "cookieAuth": [] }],
-    "parameters": [
-      {
-        "name": "body",
-        "in": "body",
-        "required": true,
-        "schema": { "$ref": "#/definitions/PermissionInput" }
+      "post": {
+        "summary": "Create a new permission.",
+        "tags": ["Permission Management"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "$ref": "#/definitions/PermissionInput" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Permission created successfully.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": { "type": "string" },
+                "permission": { "$ref": "#/definitions/Permission" }
+              }
+            }
+          },
+          "400": { "$ref": "#/responses/BadRequestError" },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" },
+          "409": { "$ref": "#/responses/ConflictError" }
+        }
       }
-    ],
-    "responses": {
-      "201": {
-        "description": "Permission created successfully.",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "message": { "type": "string" },
-            "permission": { "$ref": "#/definitions/Permission" }
-          }
-        }
-      },
-      "400": { "$ref": "#/responses/BadRequestError" },
-      "401": { "$ref": "#/responses/UnauthorizedError" },
-      "403": { "$ref": "#/responses/ForbiddenError" },
-      "409": { "$ref": "#/responses/ConflictError" }
-    }
-  }
-},
+    },
     "/app/permissions/{permission_id}": {
       "get": {
         "summary": "Get a single permission by ID.",
@@ -1387,8 +1428,16 @@
         "id": { "type": "integer" },
         "name": { "type": "string" },
         "description": { "type": "string", "x-nullable": true },
-        "status": { "type": "string", "enum": ["active", "inactive"], "description": "The active status of the category.", "default": "active" },
-        "usage": { "type": "integer", "description": "The number of permissions associated with this category. Only included if `include_usage=true`." },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive"],
+          "description": "The active status of the category.",
+          "default": "active"
+        },
+        "usage": {
+          "type": "integer",
+          "description": "The number of permissions associated with this category. Only included if `include_usage=true`."
+        },
         "affected_permissions": {
           "type": "array",
           "description": "A list of permissions (ID, name, status) associated with this category. Only included if `include_affected_permissions=true`.",
@@ -1449,14 +1498,26 @@
         "id": { "type": "integer" },
         "name": { "type": "string" },
         "description": { "type": "string", "x-nullable": true },
-        "category_id": { "type": "integer", "description": "The ID of the category the permission belongs to.", "x-nullable": true },
+        "category_id": {
+          "type": "integer",
+          "description": "The ID of the category the permission belongs to.",
+          "x-nullable": true
+        },
         "category": {
           "$ref": "#/definitions/CategoryBasic",
           "description": "The detailed category object for the permission. Only included if `include_category_details=true`.",
           "x-nullable": true
         },
-        "status": { "type": "string", "enum": ["active", "inactive"], "description": "The active status of the permission.", "default": "active" },
-        "usage": { "type": "integer", "description": "The number of roles this permission is currently assigned to. Only included if `include_usage=true`." },
+        "status": {
+          "type": "string",
+          "enum": ["active", "inactive"],
+          "description": "The active status of the permission.",
+          "default": "active"
+        },
+        "usage": {
+          "type": "integer",
+          "description": "The number of roles this permission is currently assigned to. Only included if `include_usage=true`."
+        },
         "affected_roles": {
           "type": "array",
           "description": "A list of roles (ID and Name) that this permission is assigned to. Only included if `include_usage=true`.",

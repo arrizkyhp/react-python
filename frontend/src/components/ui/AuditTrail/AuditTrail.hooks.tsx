@@ -1,6 +1,6 @@
 import {ENDPOINTS} from "@/constants/apiUrl.ts";
 import useQueryParams from "@/hooks/useQueryParams.ts";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import useGetData from "@/hooks/useGetData.ts";
 import {BaseQueryParams, ListResponse} from "@/types/responses.ts";
 import {AuditTrail} from "@/types/auditTrail.ts";
@@ -8,6 +8,10 @@ import createQueryParams from "@/utils/createQueryParams.ts";
 import {SortDirection, SortFieldAudit} from "@/types/sort.ts";
 import {ArrowDown, ArrowUp, ArrowUpDown} from "lucide-react";
 import { AuditTrailHooksProps } from "./AuditTrail.types.ts";
+import useGetAllUser from "@/hooks/useGetAllUser.ts";
+import formatOptions from "@/utils/formatOptions.ts";
+import {SelectOption} from "@/types/common.ts";
+import {User} from "@/types/user.ts";
 
 const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
     const {
@@ -32,6 +36,14 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
     const [dateTo, setDateTo] = useState<Date | undefined>()
 
     const [searchQuery, setSearchQuery] = useState(queryParams.search || "")
+
+    const { usersData } = useGetAllUser();
+
+    // Use useMemo to memoize the formatted user options
+    const userOptions: SelectOption[] = useMemo(
+        () => formatOptions<User>(usersData?.items, "id", "username"),
+        [usersData],
+    );
 
     useEffect(() => {
         setSearchQuery(queryParams.search || "");
@@ -166,6 +178,8 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         clearAllParams()
     }
 
+    console.log({userOptions})
+
     return {
         searchQuery,
         onSearchChange,
@@ -190,7 +204,8 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         onPageChange,
         items,
         getBadgeColorClass,
-        renderChangeDetails
+        renderChangeDetails,
+        userOptions
     }
 }
 

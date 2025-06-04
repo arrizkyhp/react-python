@@ -45,7 +45,8 @@ const AuditTrailComponent = ({
         onPageChange,
         items,
         getBadgeColorClass,
-        renderChangeDetails
+        renderChangeDetails,
+        userOptions
     } = useAuditTrail({ entityType });
 
     return (
@@ -147,12 +148,14 @@ const AuditTrailComponent = ({
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {/*<SelectItem value="all">All Users</SelectItem>*/}
-                                            {/*{uniqueUsers.map((user) => (*/}
-                                            {/*    <SelectItem key={user} value={user}>*/}
-                                            {/*        {user}*/}
-                                            {/*    </SelectItem>*/}
-                                            {/*))}*/}
+                                            <SelectItem key="all" value="all">
+                                                All Users
+                                            </SelectItem>
+                                            {userOptions.map((type) => (
+                                                <SelectItem key={type.value} value={type.value}>
+                                                    {type.label}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>

@@ -181,8 +181,6 @@ const useRoleDetail = () => {
 
     usePageHeader(userHeaderConfig);
 
-    console.log({permissionsData})
-
     const allGroupedPermissions = permissionsData?.items ? groupPermissionsByCategory(permissionsData.items) : {};
 
     return {
