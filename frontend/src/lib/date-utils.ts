@@ -21,3 +21,15 @@ export const formatDateTimeUS = (timestamp: string): string => {
 
     return `${formattedDate}, ${formattedTime}`;
 };
+
+// New utility function for YYYY-MM-DD format
+export const formatDateForAPI = (date: Date | undefined): string | undefined => {
+    if (!date) return undefined;
+
+    const year = date.getFullYear();
+    // Month is 0-indexed, so add 1
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};

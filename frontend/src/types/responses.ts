@@ -6,6 +6,8 @@ export type BaseQueryParams = {
     sort_by?: string;
     sort_order?: string;
     action_type?: string;
+    from_date?: string;
+    to_date?: string;
     status?: string;
     get_all?: boolean;
     include_usage?: boolean;

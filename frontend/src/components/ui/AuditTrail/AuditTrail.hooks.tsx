@@ -28,6 +28,8 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         onSortChange,
         onActionTypeChange,
         onUserChange,
+        onFromDateChange,
+        onToDateChange,
         clearAllParams
     } = useQueryParams()
 
@@ -61,7 +63,9 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
                 sort_by: queryParams.sort_by,
                 sort_order: queryParams.sort_order,
                 user_id: queryParams.user_id,
-                action_type: queryParams.action_type
+                action_type: queryParams.action_type,
+                from_date: queryParams.from_date,
+                to_date: queryParams.to_date,
             }
         }
     )
@@ -159,10 +163,6 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         onSortChange(field, newSortDirection);
     };
 
-    const handleFilterChange = () => {
-        onPageChange(1)
-    }
-
     const handleActionFilterChange = (value: string) => {
         setActionFilter(value);
         onActionTypeChange(value);
@@ -172,6 +172,16 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         setUserFilter(value);
         onUserChange(value);
     }
+
+    const handleFromDateChangeInternal = (value: Date | undefined) => {
+        setDateFrom(value);
+        onFromDateChange(value); // This now sends formatted string
+    };
+
+    const handleToDateChangeInternal = (value: Date | undefined) => {
+        setDateTo(value);
+        onToDateChange(value); // This now sends formatted string
+    };
 
     const hasActiveFilters = searchQuery || actionFilter !== "all" || userFilter !== "all" || dateFrom || dateTo
 
@@ -195,9 +205,10 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         actionFilter,
         handleActionFilterChange,
         handleUserFilterChange,
+        handleFromDateChange: handleFromDateChangeInternal,
+        handleToDateChange: handleToDateChangeInternal,
         userFilter,
         setUserFilter,
-        handleFilterChange,
         dateFrom,
         setDateFrom,
         dateTo,

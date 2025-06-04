@@ -3,6 +3,7 @@ import createQueryParams from "@/utils/createQueryParams.ts";
 import {BaseQueryParams} from "@/types/responses.ts";
 import {useLocation, useNavigate } from "react-router-dom";
 import {SortDirection, SortFieldAudit} from "@/types/sort.ts";
+import {formatDateForAPI} from "@/lib/date-utils.ts";
 
 interface QueryParamsOptions {
     replaceURL?: boolean;
@@ -23,6 +24,8 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
             sort_order: searchParams.get('sort_order') as SortDirection || undefined,
             user_id: searchParams.get('user_id') || undefined,
             action_type: searchParams.get('action_type') || undefined,
+            from_date: searchParams.get("from_date") || undefined,
+            to_date: searchParams.get("to_date") || undefined,
         };
     };
 
@@ -86,7 +89,24 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
         })
     }
 
-    // New method to clear all params at once
+    const onFromDateChange = (date: Date | undefined) => {
+        // Format the date to YYYY-MM-DD for the API
+        const formattedDate = formatDateForAPI(date);
+        updateQueryParams({
+            from_date: formattedDate,
+            page: 1, // Reset page when date filter changes
+        });
+    };
+
+    const onToDateChange = (date: Date | undefined) => {
+        // Format the date to YYYY-MM-DD for the API
+        const formattedDate = formatDateForAPI(date);
+        updateQueryParams({
+            to_date: formattedDate,
+            page: 1,
+        });
+    };
+
     const clearAllParams = () => {
         const clearedParams: BaseQueryParams = {
             search: undefined,
@@ -96,6 +116,8 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
             sort_order: 'desc',
             user_id: undefined,
             action_type: undefined,
+            from_date: undefined,
+            to_date: undefined,
         };
         updateQueryParams(clearedParams);
     };
@@ -108,6 +130,8 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
         queryParams,
         onSortChange,
         onUserChange,
+        onToDateChange,
+        onFromDateChange,
         clearAllParams
     }
 }

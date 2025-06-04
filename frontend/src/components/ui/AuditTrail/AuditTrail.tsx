@@ -33,11 +33,10 @@ const AuditTrailComponent = ({
         handleActionFilterChange,
         userFilter,
         handleUserFilterChange,
-        handleFilterChange,
+        handleFromDateChange,
+        handleToDateChange,
         dateFrom,
-        setDateFrom,
         dateTo,
-        setDateTo,
         pagination,
         onPageSizeChange,
         startIndex,
@@ -174,8 +173,7 @@ const AuditTrailComponent = ({
                                                     mode="single"
                                                     selected={dateFrom}
                                                     onSelect={(date) => {
-                                                        setDateFrom(date)
-                                                        handleFilterChange()
+                                                        handleFromDateChange(date)
                                                     }}
                                                     initialFocus
                                                 />
@@ -197,8 +195,7 @@ const AuditTrailComponent = ({
                                                     mode="single"
                                                     selected={dateTo}
                                                     onSelect={(date) => {
-                                                        setDateTo(date)
-                                                        handleFilterChange()
+                                                        handleToDateChange(date)
                                                     }}
                                                     initialFocus
                                                 />

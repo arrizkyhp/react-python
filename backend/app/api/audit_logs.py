@@ -4,6 +4,7 @@ from ..decorators import permission_required # Your custom permission decorator
 from ..config import db
 from ..models import AuditLog, User # Import AuditLog, User, and db from your config
 from sqlalchemy import desc, or_ # For sorting and advanced filtering
+from datetime import datetime, date, time, timezone
 
 audit_logs_bp = Blueprint('audit_logs', __name__)
 
@@ -20,6 +21,8 @@ def get_audit_logs():
     action_type_filter = request.args.get("action_type") # e.g., 'CREATE', 'UPDATE', 'DELETE'
     user_id_filter = request.args.get("user_id", type=int) # Filter by user who performed action
     search_query = request.args.get("search") # General search box (user, description, entity type)
+    from_date_str = request.args.get("from_date")
+    to_date_str = request.args.get("to_date")
 
     query = AuditLog.query.join(User) # Always join with User to get username for display/filter
 
@@ -32,6 +35,42 @@ def get_audit_logs():
     if user_id_filter:
         # Corrected: Filter by the 'id' column of the User model in the joined query
         query = query.filter(User.id == user_id_filter)
+
+    # Apply date range filtering
+    if from_date_str:
+        try:
+            # Assuming 'YYYY-MM-DD' format for parsing from frontend
+            # If the UI sends 'Jun 1', you might need a more robust parsing function,
+            # or ensure the frontend sends 'YYYY-MM-DD'.
+            # For 'Jun 1' example, you'd need to assume a year (e.g., current year)
+            # and parse with '%b %d' if that's the literal string.
+            # For simplicity, let's assume 'YYYY-MM-DD' is sent.
+            from_date = datetime.strptime(from_date_str, "%Y-%m-%d").replace(
+                tzinfo=timezone.utc
+            )  # Start of the day in UTC
+            query = query.filter(AuditLog.timestamp >= from_date)
+        except ValueError:
+            # Handle invalid date format, maybe return an error response
+            return (
+                jsonify({"error": "Invalid 'from_date' format. Use YYYY-MM-DD."}),
+                400,
+            )
+
+    if to_date_str:
+        try:
+            # For 'to_date', filter up to the end of the day
+            to_date = (
+                datetime.strptime(to_date_str, "%Y-%m-%d")
+                .replace(hour=23, minute=59, second=59, microsecond=999999)
+                .replace(tzinfo=timezone.utc)
+            )  # End of the day in UTC
+            query = query.filter(AuditLog.timestamp <= to_date)
+        except ValueError:
+            # Handle invalid date format, maybe return an error response
+            return (
+                jsonify({"error": "Invalid 'to_date' format. Use YYYY-MM-DD."}),
+                400,
+            )
 
     if search_query:
         # Search across relevant textual fields
