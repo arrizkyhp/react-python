@@ -33,8 +33,8 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         clearAllParams
     } = useQueryParams()
 
-    const [actionFilter, setActionFilter] = useState<string>("all")
-    const [userFilter, setUserFilter] = useState<string>("all")
+    const [actionFilter, setActionFilter] = useState<string>(queryParams.action_type || "all")
+    const [userFilter, setUserFilter] = useState<string>(queryParams.user_id || "all")
     const [dateFrom, setDateFrom] = useState<Date | undefined>()
     const [dateTo, setDateTo] = useState<Date | undefined>()
 
@@ -49,7 +49,11 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
 
     useEffect(() => {
         setSearchQuery(queryParams.search || "");
-    }, [queryParams.search]);
+        setActionFilter(queryParams.action_type || "all");
+        setUserFilter(queryParams.user_id || "all");
+        setDateFrom(queryParams.from_date ? new Date(queryParams.from_date) : undefined);
+        setDateTo(queryParams.to_date ? new Date(queryParams.to_date) : undefined);
+    }, [queryParams.search, queryParams.action_type, queryParams.user_id, queryParams.from_date, queryParams.to_date]);
 
     const { data: dataAuditTrail } = useGetData<ListResponse<AuditTrail>, BaseQueryParams>(
         ['auditTrail', entityType, createQueryParams(queryParams || {})],
@@ -183,7 +187,13 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         onToDateChange(value); // This now sends formatted string
     };
 
-    const hasActiveFilters = searchQuery || actionFilter !== "all" || userFilter !== "all" || dateFrom || dateTo
+    const hasActiveFilters = Boolean(
+        queryParams.search ||
+        (queryParams.action_type && queryParams.action_type !== "all") ||
+        (queryParams.user_id && queryParams.user_id !== "all") ||
+        queryParams.from_date ||
+        queryParams.to_date
+    );
 
     const clearFilters = () => {
         setSearchQuery("")
