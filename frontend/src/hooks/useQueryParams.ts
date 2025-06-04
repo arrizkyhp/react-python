@@ -12,6 +12,7 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [queryParams, setQueryParams] = useState<BaseQueryParams>({
+        search: '',
         page: 1,
         per_page: 10,
     });
@@ -33,9 +34,14 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
         updateQueryParams({ ...queryParams, per_page: val, page: 1 });
     };
 
+    const onSearchChange = (val: string) => {
+        updateQueryParams({ ...queryParams, search: val, page: 1 });
+    };
+
     return {
         onPageChange,
         onPageSizeChange,
+        onSearchChange,
         queryParams
     }
 }

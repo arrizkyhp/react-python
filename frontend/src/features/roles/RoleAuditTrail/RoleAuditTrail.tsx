@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import useQueryParams from "@/hooks/useQueryParams.ts";
 import createQueryParams from "@/utils/createQueryParams.ts";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import {useEffect, useState } from "react";
 import {SortDirection, SortFieldAudit} from "@/types/sort.ts";
 import {Separator} from "@/components/ui/separator.tsx";
 import { Label } from "@/components/ui/label";
@@ -34,7 +34,12 @@ const RoleAuditTrail = () => {
         }
     } = ENDPOINTS;
 
-    const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
+    const {
+        queryParams,
+        onPageChange,
+        onPageSizeChange,
+        onSearchChange
+    } = useQueryParams()
 
     const [sortField, setSortField] = useState<SortFieldAudit>("timestamp")
     const [sortDirection, setSortDirection] = useState<SortDirection>("desc")
@@ -43,7 +48,11 @@ const RoleAuditTrail = () => {
     const [dateFrom, setDateFrom] = useState<Date | undefined>()
     const [dateTo, setDateTo] = useState<Date | undefined>()
 
-    const [searchTerm, setSearchTerm] = useState("")
+    const [searchQuery, setSearchQuery] = useState(queryParams.search || "")
+
+    useEffect(() => {
+        setSearchQuery(queryParams.search || "");
+    }, [queryParams.search]);
 
     const { data: dataAuditTrail } = useGetData<ListResponse<AuditTrail>, BaseQueryParams>(
         ['auditTrailRole', createQueryParams(queryParams || {})],
@@ -53,6 +62,7 @@ const RoleAuditTrail = () => {
                 entity_type: 'Role',
                 page: queryParams.page,
                 per_page: queryParams.per_page || 10,
+                search: queryParams.search,
             }
         }
     )
@@ -154,17 +164,20 @@ const RoleAuditTrail = () => {
         onPageChange(1)
     }
 
-    const hasActiveFilters = searchTerm || actionFilter !== "all" || userFilter !== "all" || dateFrom || dateTo
+    const hasActiveFilters = searchQuery || actionFilter !== "all" || userFilter !== "all" || dateFrom || dateTo
 
 
     const clearFilters = () => {
-        setSearchTerm("")
+        setSearchQuery("")
         setActionFilter("all")
         setUserFilter("all")
         setDateFrom(undefined)
         setDateTo(undefined)
         onPageChange(1)
+        onSearchChange("")
     }
+
+    console.log(queryParams)
 
 
     return (
@@ -178,10 +191,10 @@ const RoleAuditTrail = () => {
                     <Search className="h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Search by username, description, entity type, and field name..."
-                        value={searchTerm}
+                        value={searchQuery}
                         onChange={(e) => {
-                            setSearchTerm(e.target.value)
-                            handleFilterChange()
+                            onSearchChange(e.target.value)
+                            setSearchQuery(e.target.value)
                         }}
                         className="max-w-md"
                     />

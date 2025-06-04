@@ -1,5 +1,5 @@
 export type BaseQueryParams = {
-    s?: string;
+    search?: string;
     page?: number;
     size?: number;
     per_page?: number;
