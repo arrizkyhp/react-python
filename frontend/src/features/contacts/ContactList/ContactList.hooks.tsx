@@ -38,7 +38,7 @@ const useContactList = () => {
         {
             params: {
                 page: queryParams.page,
-                per_page: queryParams.per_page || '10',
+                per_page: queryParams.per_page || 10,
             },
         }
     )

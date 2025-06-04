@@ -52,7 +52,7 @@ const RoleAuditTrail = () => {
             params: {
                 entity_type: 'Role',
                 page: queryParams.page,
-                per_page: queryParams.per_page || '10',
+                per_page: queryParams.per_page || 10,
             }
         }
     )
@@ -398,7 +398,6 @@ const RoleAuditTrail = () => {
                             <CardContent className="px-4">
                                 <div className="flex items-start gap-2">
                                     <div className="flex p-2 items-center rounded-full bg-gray-100">
-                                        <div className="flex p-2 items-center rounded-full bg-gray-100">
                                             {auditTrail.action_type === "UPDATE" && (
                                                 <SquarePen className="w-4 h-4" />
                                             )}
@@ -408,7 +407,6 @@ const RoleAuditTrail = () => {
                                             {auditTrail.action_type === "DELETE" && (
                                                 <Trash2 className="w-4 h-4" />
                                             )}
-                                        </div>
                                     </div>
                                     <div className="flex flex-col gap-2 w-full">
                                         <div className="flex gap-2 text-sm">

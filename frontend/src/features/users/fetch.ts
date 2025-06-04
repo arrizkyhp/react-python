@@ -12,7 +12,7 @@ export const fetchUsers = async (params: BaseQueryParams): Promise<FetchUsersRes
     const response = await api.get<FetchUsersResponse>('/app/users', {
         params: {
             page: params.page,
-            per_page: params.per_page || '10',
+            per_page: params.per_page || 10,
         },
     });
     return response.data;
