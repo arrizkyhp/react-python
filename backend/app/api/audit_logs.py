@@ -30,7 +30,8 @@ def get_audit_logs():
     if action_type_filter:
         query = query.filter(AuditLog.action_type.ilike(f"%{action_type_filter}%"))
     if user_id_filter:
-        query = query.filter_by(user_id=user_id_filter)
+        # Corrected: Filter by the 'id' column of the User model in the joined query
+        query = query.filter(User.id == user_id_filter)
 
     if search_query:
         # Search across relevant textual fields

@@ -27,6 +27,7 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         onSearchChange,
         onSortChange,
         onActionTypeChange,
+        onUserChange,
         clearAllParams
     } = useQueryParams()
 
@@ -39,7 +40,6 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
 
     const { usersData } = useGetAllUser();
 
-    // Use useMemo to memoize the formatted user options
     const userOptions: SelectOption[] = useMemo(
         () => formatOptions<User>(usersData?.items, "id", "username"),
         [usersData],
@@ -60,6 +60,7 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
                 search: queryParams.search,
                 sort_by: queryParams.sort_by,
                 sort_order: queryParams.sort_order,
+                user_id: queryParams.user_id,
                 action_type: queryParams.action_type
             }
         }
@@ -167,6 +168,11 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         onActionTypeChange(value);
     };
 
+    const handleUserFilterChange = (value: string) => {
+        setUserFilter(value);
+        onUserChange(value);
+    }
+
     const hasActiveFilters = searchQuery || actionFilter !== "all" || userFilter !== "all" || dateFrom || dateTo
 
     const clearFilters = () => {
@@ -178,8 +184,6 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         clearAllParams()
     }
 
-    console.log({userOptions})
-
     return {
         searchQuery,
         onSearchChange,
@@ -190,6 +194,7 @@ const useAuditTrail = ({ entityType }: AuditTrailHooksProps) => {
         clearFilters,
         actionFilter,
         handleActionFilterChange,
+        handleUserFilterChange,
         userFilter,
         setUserFilter,
         handleFilterChange,

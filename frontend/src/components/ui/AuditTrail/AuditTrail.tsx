@@ -32,7 +32,7 @@ const AuditTrailComponent = ({
         actionFilter,
         handleActionFilterChange,
         userFilter,
-        setUserFilter,
+        handleUserFilterChange,
         handleFilterChange,
         dateFrom,
         setDateFrom,
@@ -140,8 +140,7 @@ const AuditTrailComponent = ({
                                     <Select
                                         value={userFilter}
                                         onValueChange={(value) => {
-                                            setUserFilter(value)
-                                            handleFilterChange()
+                                            handleUserFilterChange(value)
                                         }}
                                     >
                                         <SelectTrigger className="w-full">

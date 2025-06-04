@@ -21,6 +21,7 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
             per_page: parseInt(searchParams.get('per_page') || '10'),
             sort_by: searchParams.get('sort_by') as SortFieldAudit || undefined,
             sort_order: searchParams.get('sort_order') as SortDirection || undefined,
+            user_id: searchParams.get('user_id') || undefined,
             action_type: searchParams.get('action_type') || undefined,
         };
     };
@@ -72,12 +73,18 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
     };
 
     const onActionTypeChange = (actionType: string) => {
-        console.log({actionType});
         updateQueryParams({
             action_type: actionType === "all" ? undefined : actionType,
             page: 1,
         });
     };
+
+    const onUserChange = (user: string) => {
+        updateQueryParams({
+            user_id: user === "all" ? undefined : user,
+            page: 1,
+        })
+    }
 
     // New method to clear all params at once
     const clearAllParams = () => {
@@ -87,6 +94,7 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
             per_page: 10,
             sort_by: 'timestamp',
             sort_order: 'desc',
+            user_id: undefined,
             action_type: undefined,
         };
         updateQueryParams(clearedParams);
@@ -99,6 +107,7 @@ const useQueryParams = (options?: QueryParamsOptions,) => {
         onActionTypeChange,
         queryParams,
         onSortChange,
+        onUserChange,
         clearAllParams
     }
 }
