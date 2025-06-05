@@ -1,54 +1,84 @@
-# React + TypeScript + Vite
+# Contact Management System - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive admin dashboard built with React, TypeScript, and Vite for managing contacts, users, roles, and permissions.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **User Management**: Create, view, update, and delete users
+- **Role-Based Access Control**: Assign permissions via roles
+- **Contact Management**: Full CRUD operations for contacts
+- **Audit Logs**: Track changes across the system
+- **Responsive UI**: Works on desktop and mobile devices
+- **Authentication**: Secure login and protected routes
 
-## Expanding the ESLint configuration
+## Technology Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Framework**: React 18
+- **Language**: TypeScript
+- **Build Tool**: Vite
+- **UI Components**: Custom component library with:
+  - Data tables
+  - Forms
+  - Modals
+  - Navigation
+- **State Management**: React Context + Custom Hooks
+- **Styling**: CSS Modules
+- **API Client**: Axios
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+## Project Structure
+
+```
+frontend/
+├── src/
+│   ├── components/       # Reusable UI components
+│   ├── features/         # Feature modules
+│   ├── pages/            # Page components
+│   ├── hooks/            # Custom hooks
+│   ├── lib/              # Utility libraries
+│   ├── types/            # TypeScript types
+│   └── utils/            # Helper functions
+├── public/               # Static assets
+└── tests/                # Test files
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Getting Started
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+1. Install dependencies:
+```bash
+pnpm install
 ```
+
+2. Start development server:
+```bash
+pnpm dev
+```
+
+3. Open [http://localhost:5173](http://localhost:5173) in your browser
+
+## Development Conventions
+
+1. **File Naming Patterns**:
+   - Component hooks: `ComponentName.hooks.tsx`
+   - Component types: `ComponentName.types.ts`
+   - Constants: `ComponentName.constants.ts`
+   - Feature-specific files follow same pattern (e.g., `ContactList.hooks.tsx`)
+
+2. **Code Organization**:
+   - Keep business logic in custom hooks
+   - Separate UI from logic where possible
+   - Types should be colocated with components when component-specific
+   - Shared types go in `src/types/`
+
+3. **Development Notes**:
+   - The frontend expects a running backend server (see backend/README.md)
+   - Environment variables should be configured in `.env` file
+   - Follow the component structure pattern for new features
+   - Use the existing hooks for data fetching and mutations
+
+## Available Scripts
+
+- `dev`: Start development server
+- `build`: Build for production
+- `preview`: Preview production build
+- `lint`: Run ESLint
+- `format`: Format code with Prettier
