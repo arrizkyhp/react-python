@@ -12,6 +12,7 @@ export interface Category {
 export interface Permission {
     id: number;
     category: Category;
+    category_id: number;
     description: string;
     name: string;
     status?: string;

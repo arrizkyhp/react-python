@@ -5,7 +5,6 @@ import {Permission} from "@/types/permission.ts";
 import {Badge} from "@/components/ui/badge.tsx";
 import { Link } from "react-router-dom";
 
-
 interface PermissionDetailProps {
     data: Permission
 }

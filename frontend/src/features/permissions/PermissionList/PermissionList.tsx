@@ -8,18 +8,32 @@ import useQueryParams from "@/hooks/useQueryParams.ts";
 import { ENDPOINTS } from "@/constants/apiUrl";
 import DataTable from "@/components/ui/DataTable";
 import { columns } from "./PermissionList.constants";
-import {EyeIcon, PencilIcon} from "lucide-react";
+import {Check, EyeIcon, PencilIcon, TrashIcon, X} from "lucide-react";
 import {Permission} from "@/types/permission.ts";
 import {Sheet, SheetContent} from "@/components/ui/sheet.tsx";
 import PermissionDetail from "@/features/permissions/PermissionDetail";
 import {Button} from "@/components/ui/button.tsx";
+import PermissionForm from "@/features/permissions/PermissionForm";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription, AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle
+} from "@/components/ui/alert-dialog.tsx";
+import {useDeleteData} from "@/hooks/useMutateData.ts";
+import {toast} from "sonner";
 
 const PermissionList = () => {
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
-    const { PERMISSIONS: { GET } } = ENDPOINTS
+    const { PERMISSIONS: { GET, GET_BY_ID } } = ENDPOINTS
 
     const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
     const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
+    const [isCreateSheetOpen, setIsCreateSheetOpen] = useState(false);
+    const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
 
     const [selectedPermissions, setSelectedPermissions] = useState<Permission>({
         id: 0,
@@ -28,14 +42,13 @@ const PermissionList = () => {
             name: "",
             description: "",
         },
+        category_id: 0,
         description: "",
         name: "",
         status: "",
         usage: 0,
         affected_roles: [],
     });
-
-
 
     const { data } = useGetData<PermissionResponse, BaseQueryParams>(
         ['permissionList', createQueryParams(queryParams || {})],
@@ -51,6 +64,30 @@ const PermissionList = () => {
         }
     )
 
+    const {
+        mutate: deletePermissionMutation,
+    } = useDeleteData<void, number>(
+        ['deleteContact', String(selectedPermissions.id)],
+        GET_BY_ID(String(selectedPermissions.id)),
+        {
+            options: {
+                onSuccess: () => {
+                    toast('Permission deleted successfully', {
+                        position: 'top-center',
+                        icon: <Check />
+                    });
+                    setIsAlertDialogOpen(false);
+
+                },
+                onError: (err) => toast(`Delete failed: ${err.message}`, {
+                    position: 'top-center',
+                    icon: <X />
+                }),
+            },
+        },
+        ['permissionList'],
+    );
+
     const handleDetailClick = (permission: Permission) => {
         setSelectedPermissions(permission)
         setIsDetailSheetOpen(true)
@@ -61,9 +98,25 @@ const PermissionList = () => {
         setIsEditSheetOpen(true);
     };
 
-    const handleCreateClick = () => {
-        setIsEditSheetOpen(true);
+    const handleDeleteClick = (permission: Permission) => {
+        setSelectedPermissions(permission);
+        setIsAlertDialogOpen(true);
     };
+
+    const handleCreateClick = () => {
+        setIsCreateSheetOpen(true);
+    };
+
+    const handleFormSuccess = () => {
+        setIsEditSheetOpen(false);
+        setIsCreateSheetOpen(false);
+    };
+
+    const handleDeleteRoleConfirm = () => {
+        if (String(selectedPermissions.id) !== '') {
+            deletePermissionMutation(Number(selectedPermissions.id));
+        }
+    }
 
     const userHeaderConfig = useMemo(() => ({
         title: "Permission List",
@@ -95,12 +148,21 @@ const PermissionList = () => {
 
                 <Sheet open={isEditSheetOpen} onOpenChange={setIsEditSheetOpen}>
                     <SheetContent>
-                        Edit
+                        <PermissionForm
+                            mode="edit"
+                            data={selectedPermissions}
+                            onSuccess={handleFormSuccess}
+                        />
+                    </SheetContent>
+                </Sheet>
 
-                        {/*<PermissionEdit*/}
-                        {/*    data={selectedPermissions}*/}
-                        {/*    onClose={() => setIsEditSheetOpen(false)} // Pass a close handler*/}
-                        {/*/>*/}
+                <Sheet open={isCreateSheetOpen} onOpenChange={setIsCreateSheetOpen}>
+                    <SheetContent>
+                        <PermissionForm
+                            mode="create"
+                            data={selectedPermissions}
+                            onSuccess={handleFormSuccess}
+                        />
                     </SheetContent>
                 </Sheet>
             </div>
@@ -122,6 +184,13 @@ const PermissionList = () => {
                         onClick: (permission) => handleEditClick(permission),
                         tooltip: "Edit",
                     },
+                    {
+                        label: "Delete",
+                        color: "destructive",
+                        icon: <TrashIcon className="h-4 w-4 text-destructive" />,
+                        onClick: (role) => handleDeleteClick(role),
+                        tooltip: "Delete",
+                    },
                 ]}
                 pagination={{
                     currentPage: data?.pagination.current_page || 1,
@@ -131,6 +200,24 @@ const PermissionList = () => {
                     onPageSizeChange: onPageSizeChange
                 }}
             />
+            <AlertDialog open={isAlertDialogOpen} onOpenChange={setIsAlertDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to delete this Permission?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the permission:
+                            <br/>
+                            <span className="font-bold"> {selectedPermissions.name}</span>.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction asChild>
+                            <Button variant="destructive" onClick={handleDeleteRoleConfirm} className="bg-red-600 hover:bg-red-700">Delete</Button>
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     )
 }

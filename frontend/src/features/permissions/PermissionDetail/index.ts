@@ -1,3 +1,3 @@
-import PermissionForm from "./PermissionForm.tsx";
+import PermissionDetail from "./PermissionDetail.tsx";
 
-export default PermissionForm;
+export default PermissionDetail;

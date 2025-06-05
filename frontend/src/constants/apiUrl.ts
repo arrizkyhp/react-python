@@ -12,7 +12,14 @@ export const ENDPOINTS = {
     },
     PERMISSIONS: {
         GET: '/app/permissions',
-        GET_BY_ID: (id: string) => `/app/permissions/${id}`
+        GET_BY_ID: (id: string) => `/app/permissions/${id}`,
+        CREATE: '/app/permissions',
+        UPDATE: (id: string) => `/app/permissions/${id}`,
+    },
+    CATEGORIES: {
+        GET: '/app/categories',
+        CREATE: '/app/categories',
+        UPDATE: (id: string) => `/app/categories/${id}`,
     },
     CONTACTS: {
         GET: '/app/contacts',

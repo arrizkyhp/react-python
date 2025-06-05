@@ -177,107 +177,107 @@
     },
     "/app/audit-logs": {
       "get": {
-    "summary": "Retrieve a paginated list of system audit logs.",
-    "tags": ["Audit Logs"],
-    "security": [{ "cookieAuth": [] }],
-    "parameters": [
-      {
-        "name": "page",
-        "in": "query",
-        "type": "integer",
-        "description": "Page number for pagination.",
-        "default": 1
-      },
-      {
-        "name": "per_page",
-        "in": "query",
-        "type": "integer",
-        "description": "Number of items per page.",
-        "default": 10
-      },
-      {
-        "name": "entity_type",
-        "in": "query",
-        "type": "string",
-        "description": "Filter by the type of entity involved (e.g., 'Category', 'Permission'). Case-insensitive partial match."
-      },
-      {
-        "name": "entity_id",
-        "in": "query",
-        "type": "integer",
-        "description": "Filter by the specific ID of the entity involved."
-      },
-      {
-        "name": "action_type",
-        "in": "query",
-        "type": "string",
-        "description": "Filter by the type of action performed (e.g., 'CREATE', 'UPDATE', 'DELETE'). Case-insensitive partial match."
-      },
-      {
-        "name": "user_id",
-        "in": "query",
-        "type": "integer",
-        "description": "Filter by the ID of the user who performed the action."
-      },
-      {
-        "name": "from_date",
-        "in": "query",
-        "type": "string",
-        "format": "date",
-        "description": "Filter logs from this date (inclusive). Format: YYYY-MM-DD."
-      },
-      {
-        "name": "to_date",
-        "in": "query",
-        "type": "string",
-        "format": "date",
-        "description": "Filter logs up to this date (inclusive, end of day). Format: YYYY-MM-DD."
-      },
-      {
-        "name": "search",
-        "in": "query",
-        "type": "string",
-        "description": "General search query across username, description, entity type, and field name (case-insensitive)."
-      },
-      {
-        "name": "sort_by",
-        "in": "query",
-        "type": "string",
-        "enum": ["timestamp", "user", "action", "entity"],
-        "description": "Field to sort the audit logs by.",
-        "default": "timestamp"
-      },
-      {
-        "name": "sort_order",
-        "in": "query",
-        "type": "string",
-        "enum": ["asc", "desc"],
-        "description": "Order of sorting (ascending or descending).",
-        "default": "desc"
-      }
-    ],
-    "responses": {
-      "200": {
-        "description": "A list of audit logs and pagination information.",
-        "schema": {
-          "type": "object",
-          "properties": {
-            "items": {
-              "type": "array",
-              "items": { "$ref": "#/definitions/AuditLog" }
-            },
-            "pagination": { "$ref": "#/definitions/Pagination" }
+        "summary": "Retrieve a paginated list of system audit logs.",
+        "tags": ["Audit Logs"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "type": "integer",
+            "description": "Page number for pagination.",
+            "default": 1
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "type": "integer",
+            "description": "Number of items per page.",
+            "default": 10
+          },
+          {
+            "name": "entity_type",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by the type of entity involved (e.g., 'Category', 'Permission'). Case-insensitive partial match."
+          },
+          {
+            "name": "entity_id",
+            "in": "query",
+            "type": "integer",
+            "description": "Filter by the specific ID of the entity involved."
+          },
+          {
+            "name": "action_type",
+            "in": "query",
+            "type": "string",
+            "description": "Filter by the type of action performed (e.g., 'CREATE', 'UPDATE', 'DELETE'). Case-insensitive partial match."
+          },
+          {
+            "name": "user_id",
+            "in": "query",
+            "type": "integer",
+            "description": "Filter by the ID of the user who performed the action."
+          },
+          {
+            "name": "from_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "description": "Filter logs from this date (inclusive). Format: YYYY-MM-DD."
+          },
+          {
+            "name": "to_date",
+            "in": "query",
+            "type": "string",
+            "format": "date",
+            "description": "Filter logs up to this date (inclusive, end of day). Format: YYYY-MM-DD."
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "type": "string",
+            "description": "General search query across username, description, entity type, and field name (case-insensitive)."
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "type": "string",
+            "enum": ["timestamp", "user", "action", "entity"],
+            "description": "Field to sort the audit logs by.",
+            "default": "timestamp"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "type": "string",
+            "enum": ["asc", "desc"],
+            "description": "Order of sorting (ascending or descending).",
+            "default": "desc"
           }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of audit logs and pagination information.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "items": { "$ref": "#/definitions/AuditLog" }
+                },
+                "pagination": { "$ref": "#/definitions/Pagination" }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid date format provided.",
+            "schema": { "$ref": "#/responses/BadRequestError" }
+          },
+          "401": { "$ref": "#/responses/UnauthorizedError" },
+          "403": { "$ref": "#/responses/ForbiddenError" }
         }
-      },
-      "400": {
-        "description": "Invalid date format provided.",
-        "schema": { "$ref": "#/responses/BadRequestError" }
-      },
-      "401": { "$ref": "#/responses/UnauthorizedError" },
-      "403": { "$ref": "#/responses/ForbiddenError" }
-    }
-  }
+      }
     },
     "/auth/register": {
       "post": {
@@ -1063,15 +1063,22 @@
             "name": "page",
             "in": "query",
             "type": "integer",
-            "description": "Page number for pagination.",
+            "description": "Page number for pagination. Ignored if `get_all` is true.",
             "default": 1
           },
           {
             "name": "per_page",
             "in": "query",
             "type": "integer",
-            "description": "Number of items per page.",
+            "description": "Number of items per page. Ignored if `get_all` is true.",
             "default": 10
+          },
+          {
+            "name": "get_all",
+            "in": "query",
+            "type": "boolean",
+            "description": "If true, returns all categories, ignoring 'page' and 'per_page' parameters. Use with caution for very large datasets.",
+            "default": false
           },
           {
             "name": "include_usage",
@@ -1092,18 +1099,18 @@
             "in": "query",
             "type": "string",
             "enum": ["active", "inactive"],
-            "description": "Filter categories by their status."
+            "description": "Filter categories by their status. Applied even if `get_all` is true."
           },
           {
             "name": "name_search",
             "in": "query",
             "type": "string",
-            "description": "Search categories by partial name match (case-insensitive)."
+            "description": "Search categories by partial name match (case-insensitive). Applied even if `get_all` is true."
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of categories and pagination information.",
+            "description": "A list of categories. If `get_all` is true, pagination metadata might be omitted.",
             "schema": {
               "type": "object",
               "properties": {
@@ -1111,7 +1118,10 @@
                   "type": "array",
                   "items": { "$ref": "#/definitions/Category" }
                 },
-                "pagination": { "$ref": "#/definitions/Pagination" }
+                "pagination": {
+                  "$ref": "#/definitions/Pagination",
+                  "description": "Omitted if `get_all` is true."
+                }
               }
             }
           },
