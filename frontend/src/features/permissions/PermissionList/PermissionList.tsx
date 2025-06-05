@@ -1,5 +1,4 @@
-import {useMemo, useState} from "react";
-import {usePageHeader} from "@/contexts/PageHeaderContext.tsx";
+import { useState } from "react";
 import useGetData from "@/hooks/useGetData.ts";
 import {BaseQueryParams} from "@/types/responses.ts";
 import createQueryParams from "@/utils/createQueryParams.ts";
@@ -26,13 +25,20 @@ import {
 import {useDeleteData} from "@/hooks/useMutateData.ts";
 import {toast} from "sonner";
 
-const PermissionList = () => {
+interface PermissionDetailProps {
+    isCreateSheetOpen: boolean
+    setIsCreateSheetOpen: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+const PermissionList = (props: PermissionDetailProps) => {
+    const { isCreateSheetOpen, setIsCreateSheetOpen } = props;
+
     const { queryParams, onPageChange, onPageSizeChange } = useQueryParams()
     const { PERMISSIONS: { GET, GET_BY_ID } } = ENDPOINTS
 
     const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
     const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
-    const [isCreateSheetOpen, setIsCreateSheetOpen] = useState(false);
+
     const [isAlertDialogOpen, setIsAlertDialogOpen] = useState(false);
 
     const [selectedPermissions, setSelectedPermissions] = useState<Permission>({
@@ -103,10 +109,6 @@ const PermissionList = () => {
         setIsAlertDialogOpen(true);
     };
 
-    const handleCreateClick = () => {
-        setIsCreateSheetOpen(true);
-    };
-
     const handleFormSuccess = () => {
         setIsEditSheetOpen(false);
         setIsCreateSheetOpen(false);
@@ -117,22 +119,6 @@ const PermissionList = () => {
             deletePermissionMutation(Number(selectedPermissions.id));
         }
     }
-
-    const userHeaderConfig = useMemo(() => ({
-        title: "Permission List",
-        breadcrumbs: [{ label: "Permission List" }],
-        showBackButton: false,
-        actions: (
-            <Button
-                className="bg-green-600 hover:bg-green-700"
-                onClick={handleCreateClick}
-            >
-                Create Permission
-            </Button>
-        )
-    }), []);
-
-    usePageHeader(userHeaderConfig);
 
     return (
         <>
